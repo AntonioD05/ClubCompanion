@@ -1,0 +1,165 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: var(--background);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background shapes */
+.backgroundShapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.shape {
+  position: absolute;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 20s infinite;
+}
+
+.shape:nth-child(1) {
+  width: 500px;
+  height: 500px;
+  top: -250px;
+  left: -100px;
+  animation-delay: -2s;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+}
+
+.shape:nth-child(2) {
+  width: 400px;
+  height: 400px;
+  top: 50%;
+  right: -200px;
+  animation-delay: -5s;
+  background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+}
+
+.shape:nth-child(3) {
+  width: 300px;
+  height: 300px;
+  bottom: -150px;
+  left: 30%;
+  animation-delay: -8s;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(50px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Content styles with increased contrast for better readability */
+.main {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  margin-bottom: 3rem;
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 16px;
+  background: rgba(26, 26, 26, 0.7);
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: var(--foreground);
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.loginContainer {
+  background: var(--background-light);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loginContainer h2 {
+  color: var(--foreground);
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+
+.loginOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--foreground);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.loginButton:hover {
+  background: var(--background-light);
+  border-color: var(--secondary);
+}
+
+.buttonIcon {
+  width: 24px !important;
+  height: 24px !important;
+  filter: invert(1);
+  margin-right: 8px;
+}
+
+.registerText {
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+}
+
+.registerLink {
+  color: var(--secondary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.registerLink:hover {
+  text-decoration: underline;
+}
