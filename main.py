@@ -115,7 +115,7 @@ async def club_login(login_data: LoginData):
 async def register_student(student: StudentRegister):
     conn = None
     cur = None
-    
+     
     try:
         conn = get_db_connection()
         cur = conn.cursor()

@@ -1,8 +1,8 @@
 -- Connect to PostgreSQL and create database
-CREATE DATABASE club_companion;
+
 
 -- Connect to the new database and create tables
-\c club_companion
+
 
 -- Authentication Database Tables
 CREATE TABLE auth_credentials (
