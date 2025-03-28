@@ -24,6 +24,7 @@ export default function Register() {
     interests: ''
   });
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
