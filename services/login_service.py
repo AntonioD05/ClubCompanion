@@ -7,7 +7,6 @@ from database.db import get_db_connection
 
 router = APIRouter()
 
-@router.post("/login/student")
 async def student_login(login_data: LoginData):
     conn = None
     cur = None
@@ -36,7 +35,6 @@ async def student_login(login_data: LoginData):
         if conn:
             conn.close()
 
-@router.post("/login/club")
 async def club_login(login_data: LoginData):
     conn = None
     cur = None
