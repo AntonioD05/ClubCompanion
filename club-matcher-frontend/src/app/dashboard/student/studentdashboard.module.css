@@ -1,0 +1,262 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-light);
+  border-bottom: 1px solid var(--border);
+}
+
+.logoutButton {
+  color: var(--secondary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.logoutButton:hover {
+  color: var(--secondary-hover);
+}
+
+.main {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.section h3 {
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.profileContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.profilePictureSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+}
+
+.profilePicture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: var(--background-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  border: 2px solid var(--border);
+  font-size: 2rem;
+  color: var(--text-muted);
+  background-size: cover;
+  background-position: center;
+  transition: all 0.2s;
+}
+
+.profilePicture:hover {
+  border-color: var(--primary);
+}
+
+.uploadButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadButton:hover {
+  border-color: var(--primary);
+}
+
+.profileInfoSection {
+  flex: 1;
+  min-width: 300px;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+}
+
+.readOnlyField {
+  background-color: var(--background-light) !important;
+  color: var(--text-muted) !important;
+}
+
+.passwordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.changePasswordButton {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.passwordFields {
+  border: 1px solid var(--border);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.error {
+  color: var(--secondary);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.updatePasswordButton, .saveButton {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.updatePasswordButton:hover, .saveButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.interestsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  margin-top: 1rem;
+}
+
+.interestsHint {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.interestsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.interestTag {
+  background-color: var(--background-light);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+}
+
+.interestTag:hover {
+  border-color: var(--primary);
+}
+
+.interestTag.selected {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.saveButton {
+  margin-top: 1rem;
+}
+
+.filterContainer {
+  margin-bottom: 1.5rem;
+}
+
+.filterDropdown {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  background-color: var(--background-light);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.navBar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--background-light);
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0;
+}
+
+.navButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.navButton span {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.navButton:hover {
+  color: var(--foreground);
+}
+
+.navButton.active {
+  color: var(--foreground);
+  font-weight: 600;
+}
