@@ -14,9 +14,27 @@ const mockClubData = {
 
 // Mock members data
 const mockMembers = [
-  { id: 1, name: 'Alice Johnson', email: 'alice@ufl.edu', joinDate: '2023-01-15' },
-  { id: 2, name: 'Bob Smith', email: 'bob@ufl.edu', joinDate: '2023-02-03' },
-  { id: 3, name: 'Charlie Brown', email: 'charlie@ufl.edu', joinDate: '2023-02-20' },
+  { 
+    id: 1, 
+    name: 'Alice Johnson', 
+    email: 'alice@ufl.edu', 
+    joinDate: '2023-01-15',
+    profilePicture: null 
+  },
+  { 
+    id: 2, 
+    name: 'Bob Smith', 
+    email: 'bob@ufl.edu', 
+    joinDate: '2023-02-03',
+    profilePicture: null 
+  },
+  { 
+    id: 3, 
+    name: 'Charlie Brown', 
+    email: 'charlie@ufl.edu', 
+    joinDate: '2023-02-20',
+    profilePicture: null 
+  },
 ];
 
 // Mock messages data
@@ -60,6 +78,8 @@ const ProfileSection = () => {
   const [passwordError, setPasswordError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const MAX_DESCRIPTION_LENGTH = 500;
 
   // Handle interest toggle
   const toggleInterest = (interest: string) => {
@@ -82,6 +102,10 @@ const ProfileSection = () => {
     setPasswordError('');
     setShowPasswordFields(false);
     setPassword({ current: '', new: '', confirm: '' });
+    
+    // Show success message
+    setSuccessMessage('Password updated successfully!');
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   // Handle profile picture upload
@@ -94,6 +118,28 @@ const ProfileSection = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+  
+  // Handle description change
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value.length <= MAX_DESCRIPTION_LENGTH) {
+      setClubData({...clubData, description: value});
+    }
+  };
+  
+  // Save profile changes
+  const saveProfileChanges = () => {
+    // In a real app, you'd call an API to update the club data
+    console.log('Saving club profile:', {
+      ...clubData, 
+      interests: selectedInterests,
+      profilePicture: profileImage
+    });
+    
+    // Show success message
+    setSuccessMessage('Profile updated successfully!');
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   // List of possible interests
@@ -118,6 +164,12 @@ const ProfileSection = () => {
   return (
     <div className={styles.section}>
       <h2>Club Profile</h2>
+      
+      {successMessage && (
+        <div className={styles.successMessage}>
+          {successMessage}
+        </div>
+      )}
       
       <div className={styles.profileContainer}>
         {/* Profile Picture Section */}
@@ -163,16 +215,26 @@ const ProfileSection = () => {
               readOnly 
               className={styles.readOnlyField}
             />
+            <div className={styles.inputHelp}>Email cannot be changed</div>
           </div>
           
           <div className={styles.formGroup}>
-            <label>Description</label>
+            <div className={styles.labelWithCounter}>
+              <label>Description</label>
+              <span className={styles.characterCounter}>
+                {clubData.description.length}/{MAX_DESCRIPTION_LENGTH}
+              </span>
+            </div>
             <textarea 
               value={clubData.description} 
-              onChange={(e) => setClubData({...clubData, description: e.target.value})}
+              onChange={handleDescriptionChange}
               className={styles.textarea}
               rows={4}
+              placeholder="Describe your club's mission, activities, and what members can expect"
             />
+            <div className={styles.inputHelp}>
+              A good description helps students understand what your club is all about
+            </div>
           </div>
           
           {/* Password Section */}
@@ -251,7 +313,7 @@ const ProfileSection = () => {
         
         <button 
           className={styles.saveButton}
-          onClick={() => console.log('Saving club profile:', {...clubData, interests: selectedInterests})}
+          onClick={saveProfileChanges}
         >
           Save Changes
         </button>
@@ -405,45 +467,173 @@ const MessagesSection = () => {
 };
 
 // Members Section Component
-const MembersSection = () => (
-  <div className={styles.section}>
-    <h2>Club Members</h2>
+const MembersSection = () => {
+  const [members] = useState(mockMembers);
+  const [selectedMember, setSelectedMember] = useState<number | null>(null);
+  const [messageText, setMessageText] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Generate initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  // View member details
+  const viewMemberDetails = (id: number) => {
+    setSelectedMember(id);
+  };
+
+  // Close member details
+  const closeMemberDetails = () => {
+    setSelectedMember(null);
+    setMessageText('');
+  };
+
+  // Send message to member
+  const sendMessageToMember = () => {
+    if (!messageText.trim() || !selectedMember) return;
     
-    <div className={styles.tableContainer}>
-      {mockMembers.length > 0 ? (
-        <table className={styles.membersTable}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Join Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockMembers.map(member => (
-              <tr key={member.id}>
-                <td>{member.name}</td>
-                <td>{member.email}</td>
-                <td>{new Date(member.joinDate).toLocaleDateString()}</td>
-                <td>
-                  <button className={styles.actionButton}>
-                    Message
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    console.log(`Sending message to member #${selectedMember}: ${messageText}`);
+    setMessageText('');
+    
+    // Show success message briefly
+    setSuccessMessage('Message sent successfully!');
+    setTimeout(() => {
+      setSuccessMessage('');
+      closeMemberDetails();
+    }, 2000);
+  };
+
+  // Get the selected member
+  const currentMember = selectedMember 
+    ? members.find(member => member.id === selectedMember) 
+    : null;
+
+  return (
+    <div className={styles.section}>
+      <h2>Club Members</h2>
+      
+      {successMessage && (
+        <div className={styles.successMessage}>
+          {successMessage}
+        </div>
+      )}
+      
+      {!selectedMember ? (
+        <div className={styles.tableContainer}>
+          {members.length > 0 ? (
+            <table className={styles.membersTable}>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Email</th>
+                  <th>Join Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map(member => (
+                  <tr key={member.id}>
+                    <td>
+                      <div className={styles.memberInfo}>
+                        <div className={styles.memberAvatar}>
+                          {member.profilePicture ? (
+                            <div 
+                              className={styles.avatarImage} 
+                              style={{ backgroundImage: `url(${member.profilePicture})` }}
+                            />
+                          ) : (
+                            <div className={styles.avatarInitials}>
+                              {getInitials(member.name)}
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.memberName}>{member.name}</div>
+                      </div>
+                    </td>
+                    <td>{member.email}</td>
+                    <td>{new Date(member.joinDate).toLocaleDateString()}</td>
+                    <td>
+                      <button 
+                        className={styles.actionButton}
+                        onClick={() => viewMemberDetails(member.id)}
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateIcon}>👥</div>
+              <p>No members yet</p>
+            </div>
+          )}
+        </div>
       ) : (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyStateIcon}>👥</div>
-          <p>No members yet</p>
+        <div className={styles.memberDetail}>
+          <div className={styles.memberDetailHeader}>
+            <button 
+              className={styles.backButton}
+              onClick={closeMemberDetails}
+            >
+              ← Back to members
+            </button>
+          </div>
+          
+          <div className={styles.memberDetailContent}>
+            <div className={styles.memberDetailAvatar}>
+              {currentMember?.profilePicture ? (
+                <div 
+                  className={styles.largeAvatarImage} 
+                  style={{ backgroundImage: `url(${currentMember.profilePicture})` }}
+                />
+              ) : (
+                <div className={styles.largeAvatarInitials}>
+                  {getInitials(currentMember?.name || '')}
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.memberDetailInfo}>
+              <h3>{currentMember?.name}</h3>
+              <div className={styles.memberDetailEmail}>{currentMember?.email}</div>
+              <div className={styles.memberDetailJoined}>
+                Joined on {new Date(currentMember?.joinDate || '').toLocaleDateString()}
+              </div>
+              
+              <div className={styles.messageContainer}>
+                <h4>Send Message</h4>
+                <textarea
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Type your message here..."
+                  className={styles.messageTextarea}
+                  rows={4}
+                />
+                <div className={styles.messageActions}>
+                  <button 
+                    className={styles.sendButton}
+                    onClick={sendMessageToMember}
+                    disabled={!messageText.trim()}
+                  >
+                    Send Message
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
-  </div>
-);
+  );
+};
 
 export default function ClubDashboard() {
   const [activeTab, setActiveTab] = useState('profile');

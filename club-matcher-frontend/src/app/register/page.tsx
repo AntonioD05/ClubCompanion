@@ -1,8 +1,26 @@
 'use client';
 import { useState } from 'react';
 import styles from './page.module.css';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+// List of available interests
+const INTERESTS_OPTIONS = [
+  'Technology',
+  'Sports',
+  'Arts',
+  'Academic',
+  'Cultural',
+  'Music',
+  'Science',
+  'Gaming',
+  'Social',
+  'Political',
+  'Environmental',
+  'Business',
+  'Health',
+  'Language',
+  'Religious'
+];
 
 interface RegisterData {
   email: string;
@@ -21,9 +39,18 @@ export default function Register() {
     confirmPassword: '',
     name: '',
     description: '',
-    interests: ''
   });
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [error, setError] = useState('');
+
+  // Toggle interest selection
+  const toggleInterest = (interest: string) => {
+    if (selectedInterests.includes(interest)) {
+      setSelectedInterests(selectedInterests.filter(i => i !== interest));
+    } else {
+      setSelectedInterests([...selectedInterests, interest]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,14 +67,17 @@ export default function Register() {
       return;
     }
 
-    // Convert comma-separated interests to array
-    const interests = formData.interests.split(',').map(i => i.trim()).filter(i => i);
+    // Validate that at least one interest is selected
+    if (selectedInterests.length === 0) {
+      setError('Please select at least one interest');
+      return;
+    }
 
     const registerData: RegisterData = {
       email: formData.email,
       password: formData.password,
       name: formData.name,
-      interests: interests
+      interests: selectedInterests
     };
 
     if (isClub && formData.description) {
@@ -85,9 +115,9 @@ export default function Register() {
       </div>
       
       <main className={styles.main}>
-        <Link href="/" className={styles.backButton}>
+        <a href="/" className={styles.backButton}>
           ← Back
-        </Link>
+        </a>
         <div className={styles.registerContainer}>
           <h1>Create Account</h1>
           
@@ -134,21 +164,25 @@ export default function Register() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Describe your club's mission, activities, and what members can expect"
                 />
               </div>
             )}
 
             <div className={styles.formGroup}>
-              <label htmlFor="interests">
-                {isClub ? 'Club Keywords (separate with commas)' : 'Interests (separate with commas)'}
-              </label>
-              <textarea
-                id="interests"
-                value={formData.interests}
-                onChange={(e) => setFormData({...formData, interests: e.target.value})}
-                required
-                placeholder="e.g., Technology, Sports, Art"
-              />
+              <label>{isClub ? 'Club Keywords' : 'Interests'}</label>
+              <p className={styles.interestsHint}>Select all that apply</p>
+              <div className={styles.interestsList}>
+                {INTERESTS_OPTIONS.map(interest => (
+                  <div 
+                    key={interest} 
+                    className={`${styles.interestTag} ${selectedInterests.includes(interest) ? styles.selected : ''}`}
+                    onClick={() => toggleInterest(interest)}
+                  >
+                    {interest}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className={styles.formGroup}>

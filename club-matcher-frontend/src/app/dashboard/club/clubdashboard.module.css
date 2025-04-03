@@ -241,6 +241,7 @@
   
   .tableContainer {
     overflow-x: auto;
+    margin-top: 1rem;
   }
   
   .membersTable {
@@ -510,4 +511,161 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  
+  /* Member section styles */
+  .memberInfo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .memberAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .avatarImage {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .avatarInitials {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .memberName {
+    font-weight: 500;
+  }
+  
+  /* Member detail styles */
+  .memberDetail {
+    background-color: var(--background-light);
+    border-radius: 8px;
+    margin-top: 1rem;
+    overflow: hidden;
+  }
+  
+  .memberDetailHeader {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .memberDetailContent {
+    padding: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  .memberDetailAvatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .largeAvatarImage {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .largeAvatarInitials {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 2.5rem;
+  }
+  
+  .memberDetailInfo {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .memberDetailInfo h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .memberDetailEmail {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  
+  .memberDetailJoined {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  
+  .messageContainer {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+  
+  .messageContainer h4 {
+    margin-bottom: 1rem;
+  }
+  
+  .messageTextarea {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  .messageTextarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .messageActions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .labelWithCounter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .characterCounter {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  
+  .inputHelp {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
   }
