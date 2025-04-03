@@ -1,0 +1,668 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-light);
+  border-bottom: 1px solid var(--border);
+}
+
+.logoutButton {
+  color: var(--secondary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.logoutButton:hover {
+  color: var(--secondary-hover);
+}
+
+.main {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.section h3 {
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.profileContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.profilePictureSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+}
+
+.profilePicture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: var(--background-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  border: 2px solid var(--border);
+  font-size: 2rem;
+  color: var(--text-muted);
+  background-size: cover;
+  background-position: center;
+  transition: all 0.2s;
+}
+
+.profilePicture:hover {
+  border-color: var(--primary);
+}
+
+.uploadButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadButton:hover {
+  border-color: var(--primary);
+}
+
+.profileInfoSection {
+  flex: 1;
+  min-width: 300px;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+}
+
+.readOnlyField {
+  background-color: var(--background-light) !important;
+  color: var(--text-muted) !important;
+}
+
+.passwordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.changePasswordButton {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.passwordFields {
+  border: 1px solid var(--border);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.error {
+  color: var(--secondary);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.updatePasswordButton, .saveButton {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.updatePasswordButton:hover, .saveButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.interestsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  margin-top: 1rem;
+}
+
+.interestsHint {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.interestsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.interestTag {
+  background-color: var(--background-light);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+}
+
+.interestTag:hover {
+  border-color: var(--primary);
+}
+
+.interestTag.selected {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.saveButton {
+  margin-top: 1rem;
+}
+
+.filterContainer {
+  margin-bottom: 1.5rem;
+}
+
+.filterDropdown {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  background-color: var(--background-light);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.navBar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--background-light);
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0;
+}
+
+.navButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.navButton span {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.navButton:hover {
+  color: var(--foreground);
+}
+
+.navButton.active {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Search section styles */
+.searchBar {
+  margin-bottom: 1.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.filterSection {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.filterSection h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.filterGroup {
+  margin-bottom: 1.5rem;
+}
+
+.filterGroup:last-child {
+  margin-bottom: 0;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.clubResults h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.clubsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.clubCard {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.clubCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.clubHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.clubAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.clubAvatarImage {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.clubAvatarInitials {
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.clubInfo {
+  flex: 1;
+}
+
+.clubName {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+}
+
+.clubMembers {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.clubDescription {
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.clubTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.clubTag {
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.contactButton {
+  margin-top: auto;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.contactButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.saveButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.saveButton:hover {
+  color: var(--foreground);
+}
+
+.saveButton.saved {
+  color: var(--secondary);
+}
+
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background-color: var(--background-light);
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.clearFiltersButton {
+  margin-top: 1rem;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearFiltersButton:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.inputHelp {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Saved clubs section styles */
+.savedClubsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.savedClubCard {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+  padding: 1rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.savedClubCard:hover {
+  border-color: var(--primary);
+}
+
+.savedClubCard.expanded {
+  border-color: var(--primary);
+}
+
+.savedClubHeader {
+  display: flex;
+  align-items: center;
+}
+
+.savedClubDetails {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.clubActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.viewDetailsButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.viewDetailsButton:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  margin-left: auto;
+}
+
+.removeButton:hover {
+  color: var(--secondary-hover);
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background-color: var(--background);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalHeader h3 {
+  margin: 0;
+}
+
+.closeModalButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modalBody {
+  padding: 1rem;
+}
+
+.contactTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--background-light);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  border-color: var(--primary);
+}
+
+.successMessage {
+  background-color: #0077b6;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+}
+
+.successMessage::before {
+  content: '✓';
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

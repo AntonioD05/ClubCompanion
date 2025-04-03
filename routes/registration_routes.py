@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from services.registration_service import register_student, register_club
+
 from models.schemas import StudentRegister, ClubRegister
+from services.registration_service import register_student, register_club
 
 router = APIRouter()
 
@@ -13,7 +14,7 @@ async def register_student_route(student: StudentRegister):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 @router.post("/register/club")
 async def register_club_route(club: ClubRegister):
     try:
@@ -22,4 +23,4 @@ async def register_club_route(club: ClubRegister):
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) 

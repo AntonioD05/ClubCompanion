@@ -1,11 +1,7 @@
-from fastapi import APIRouter, HTTPException
-from services.login_service import *
+from fastapi import HTTPException
 from services.auth_service import verify_password
-from services.registration_service import register_student, register_club
-from models.schemas import LoginData, StudentRegister, ClubRegister
+from models.schemas import LoginData
 from database.db import get_db_connection
-
-router = APIRouter()
 
 async def student_login(login_data: LoginData):
     conn = None
