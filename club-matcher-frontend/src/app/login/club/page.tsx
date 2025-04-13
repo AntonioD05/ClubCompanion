@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import styles from './page.module.css';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function ClubLogin() {
@@ -32,6 +31,10 @@ export default function ClubLogin() {
         return; // Don't redirect if login failed
       }
 
+      // Store the club ID and email in sessionStorage
+      sessionStorage.setItem('clubId', data.id.toString());
+      sessionStorage.setItem('userEmail', email);
+      
       // Only redirect if login was successful
       router.push('/dashboard/club');
     } catch (err) {
@@ -50,9 +53,9 @@ export default function ClubLogin() {
       </div>
       
       <main className={styles.main}>
-        <Link href="/" className={styles.backButton}>
+        <a href="/" className={styles.backButton}>
           ← Back
-        </Link>
+        </a>
         <div className={styles.loginContainer}>
           <h1>Club Login</h1>
           

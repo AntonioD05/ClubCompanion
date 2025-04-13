@@ -18,3 +18,10 @@ class ClubRegister(BaseModel):
     name: str
     description: Optional[str] = None
     interests: List[str]
+
+# Profile update model
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    interests: Optional[List[str]] = None
+    description: Optional[str] = None
+    profile_picture: Optional[str] = None  # Base64 encoded image string

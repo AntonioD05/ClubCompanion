@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './clubdashboard.module.css';
 
 // Mock club data - in a real application, this would come from an API
@@ -67,8 +67,14 @@ const mockMessages = [
 
 // Profile Section Component
 const ProfileSection = () => {
-  const [clubData, setClubData] = useState(mockClubData);
-  const [selectedInterests, setSelectedInterests] = useState(clubData.interests);
+  const [clubData, setClubData] = useState({
+    name: '',
+    email: '',
+    description: '',
+    interests: [] as string[],
+    profilePicture: null as string | null
+  });
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [password, setPassword] = useState({
     current: '',
@@ -79,7 +85,52 @@ const ProfileSection = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const MAX_DESCRIPTION_LENGTH = 500;
+
+  // Load club data from backend
+  useEffect(() => {
+    const fetchClubData = async () => {
+      try {
+        setIsDataLoading(true);
+        setLoadError('');
+        // Get club ID from sessionStorage
+        const storedId = sessionStorage.getItem('clubId');
+        const clubId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+        const response = await fetch(`/api/profile/club/${clubId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Loaded club data:", data);
+          
+          setClubData({
+            name: data.name || '',
+            email: data.email || '',
+            description: data.description || '',
+            interests: data.interests || [],
+            profilePicture: data.profile_picture
+          });
+          setSelectedInterests(data.interests || []);
+          if (data.profile_picture) {
+            setProfileImage(data.profile_picture);
+          }
+        } else {
+          const errorData = await response.json();
+          setLoadError(`Failed to load profile: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading profile:', errorData);
+        }
+      } catch (error) {
+        setLoadError('Failed to connect to server. Please try again later.');
+        console.error('Error fetching club data:', error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    fetchClubData();
+  }, []);
 
   // Handle interest toggle
   const toggleInterest = (interest: string) => {
@@ -129,17 +180,76 @@ const ProfileSection = () => {
   };
   
   // Save profile changes
-  const saveProfileChanges = () => {
-    // In a real app, you'd call an API to update the club data
-    console.log('Saving club profile:', {
-      ...clubData, 
-      interests: selectedInterests,
-      profilePicture: profileImage
-    });
-    
-    // Show success message
-    setSuccessMessage('Profile updated successfully!');
-    setTimeout(() => setSuccessMessage(''), 3000);
+  const saveProfileChanges = async () => {
+    setIsLoading(true);
+
+    try {
+      // Get club ID from sessionStorage
+      const storedId = sessionStorage.getItem('clubId');
+      const clubId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+      
+      const profileData = {
+        name: clubData.name,
+        description: clubData.description,
+        interests: selectedInterests,
+        profile_picture: profileImage
+      };
+
+      const response = await fetch(`/api/profile/club/${clubId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to update profile');
+      }
+
+      // Update local state with new values
+      setClubData({
+        ...clubData,
+        interests: selectedInterests,
+        profilePicture: profileImage as null
+      });
+      
+      // Show success message
+      setSuccessMessage('Profile updated successfully!');
+      
+      // Refresh data from server after 1 second (to allow database to update)
+      setTimeout(async () => {
+        try {
+          const storedId = sessionStorage.getItem('clubId');
+          const clubId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+          const refreshResponse = await fetch(`/api/profile/club/${clubId}`);
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            setClubData({
+              name: refreshData.name || '',
+              email: refreshData.email || '',
+              description: refreshData.description || '',
+              interests: refreshData.interests || [],
+              profilePicture: refreshData.profile_picture
+            });
+            if (refreshData.profile_picture) {
+              setProfileImage(refreshData.profile_picture);
+            }
+            console.log("Profile data refreshed:", refreshData);
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing profile data:', refreshError);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSuccessMessage('Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
   };
 
   // List of possible interests
@@ -170,129 +280,150 @@ const ProfileSection = () => {
           {successMessage}
         </div>
       )}
-      
-      <div className={styles.profileContainer}>
-        {/* Profile Picture Section */}
-        <div className={styles.profilePictureSection}>
-          <div 
-            className={styles.profilePicture}
-            onClick={() => fileInputRef.current?.click()}
-            style={{ backgroundImage: profileImage ? `url(${profileImage})` : 'none' }}
-          >
-            {!profileImage && <span>+</span>}
-          </div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImageChange} 
-            accept="image/*" 
-            style={{ display: 'none' }}
-          />
+
+      {loadError && (
+        <div className={styles.error}>
+          {loadError}
           <button 
-            className={styles.uploadButton}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => window.location.reload()} 
+            className={styles.retryButton}
           >
-            Upload Logo
+            Retry
           </button>
         </div>
+      )}
+      
+      {isDataLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loading}>Loading profile data...</div>
+        </div>
+      ) : (
+        <div className={styles.profileContainer}>
+          {/* Profile Picture Section */}
+          <div className={styles.profilePictureSection}>
+            <div 
+              className={styles.profilePicture}
+              onClick={() => fileInputRef.current?.click()}
+              style={{ backgroundImage: profileImage ? 
+                (profileImage.startsWith('data:') ? `url(${profileImage})` : `url('${profileImage}')`) 
+                : 'none' 
+              }}
+            >
+              {!profileImage && <span>+</span>}
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              accept="image/*" 
+              style={{ display: 'none' }}
+            />
+            <button 
+              className={styles.uploadButton}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Upload Logo
+            </button>
+          </div>
 
-        {/* Profile Info Section */}
-        <div className={styles.profileInfoSection}>
-          <div className={styles.formGroup}>
-            <label>Club Name</label>
-            <input 
-              type="text" 
-              value={clubData.name} 
-              onChange={(e) => setClubData({...clubData, name: e.target.value})}
-            />
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label>Email</label>
-            <input 
-              type="email" 
-              value={clubData.email} 
-              readOnly 
-              className={styles.readOnlyField}
-            />
-            <div className={styles.inputHelp}>Email cannot be changed</div>
-          </div>
-          
-          <div className={styles.formGroup}>
-            <div className={styles.labelWithCounter}>
-              <label>Description</label>
-              <span className={styles.characterCounter}>
-                {clubData.description.length}/{MAX_DESCRIPTION_LENGTH}
-              </span>
-            </div>
-            <textarea 
-              value={clubData.description} 
-              onChange={handleDescriptionChange}
-              className={styles.textarea}
-              rows={4}
-              placeholder="Describe your club's mission, activities, and what members can expect"
-            />
-            <div className={styles.inputHelp}>
-              A good description helps students understand what your club is all about
-            </div>
-          </div>
-          
-          {/* Password Section */}
-          <div className={styles.formGroup}>
-            <div className={styles.passwordHeader}>
-              <label>Password</label>
-              <button 
-                type="button" 
-                className={styles.changePasswordButton}
-                onClick={() => setShowPasswordFields(!showPasswordFields)}
-              >
-                {showPasswordFields ? 'Cancel' : 'Change Password'}
-              </button>
+          {/* Profile Info Section */}
+          <div className={styles.profileInfoSection}>
+            <div className={styles.formGroup}>
+              <label>Club Name</label>
+              <input 
+                type="text" 
+                value={clubData.name} 
+                onChange={(e) => setClubData({...clubData, name: e.target.value})}
+              />
             </div>
             
-            {showPasswordFields && (
-              <div className={styles.passwordFields}>
-                {passwordError && <div className={styles.error}>{passwordError}</div>}
-                
-                <div className={styles.formGroup}>
-                  <label>Current Password</label>
-                  <input 
-                    type="password" 
-                    value={password.current} 
-                    onChange={(e) => setPassword({...password, current: e.target.value})}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>New Password</label>
-                  <input 
-                    type="password" 
-                    value={password.new} 
-                    onChange={(e) => setPassword({...password, new: e.target.value})}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    value={password.confirm} 
-                    onChange={(e) => setPassword({...password, confirm: e.target.value})}
-                  />
-                </div>
-                
+            <div className={styles.formGroup}>
+              <label>Email</label>
+              <input 
+                type="email" 
+                value={clubData.email} 
+                readOnly 
+                className={styles.readOnlyField}
+              />
+              <div className={styles.inputHelp}>Email cannot be changed</div>
+            </div>
+            
+            <div className={styles.formGroup}>
+              <div className={styles.labelWithCounter}>
+                <label>Description</label>
+                <span className={styles.characterCounter}>
+                  {clubData.description.length}/{MAX_DESCRIPTION_LENGTH}
+                </span>
+              </div>
+              <textarea 
+                value={clubData.description} 
+                onChange={handleDescriptionChange}
+                className={styles.textarea}
+                rows={4}
+                placeholder="Describe your club's mission, activities, and what members can expect"
+              />
+              <div className={styles.inputHelp}>
+                A good description helps students understand what your club is all about
+              </div>
+            </div>
+            
+            {/* Password Section */}
+            <div className={styles.formGroup}>
+              <div className={styles.passwordHeader}>
+                <label>Password</label>
                 <button 
                   type="button" 
-                  className={styles.updatePasswordButton}
-                  onClick={handlePasswordChange}
+                  className={styles.changePasswordButton}
+                  onClick={() => setShowPasswordFields(!showPasswordFields)}
                 >
-                  Update Password
+                  {showPasswordFields ? 'Cancel' : 'Change Password'}
                 </button>
               </div>
-            )}
+              
+              {showPasswordFields && (
+                <div className={styles.passwordFields}>
+                  {passwordError && <div className={styles.error}>{passwordError}</div>}
+                  
+                  <div className={styles.formGroup}>
+                    <label>Current Password</label>
+                    <input 
+                      type="password" 
+                      value={password.current} 
+                      onChange={(e) => setPassword({...password, current: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>New Password</label>
+                    <input 
+                      type="password" 
+                      value={password.new} 
+                      onChange={(e) => setPassword({...password, new: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>Confirm New Password</label>
+                    <input 
+                      type="password" 
+                      value={password.confirm} 
+                      onChange={(e) => setPassword({...password, confirm: e.target.value})}
+                    />
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className={styles.updatePasswordButton}
+                    onClick={handlePasswordChange}
+                  >
+                    Update Password
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       
       {/* Interests Section */}
       <div className={styles.interestsSection}>
@@ -314,8 +445,9 @@ const ProfileSection = () => {
         <button 
           className={styles.saveButton}
           onClick={saveProfileChanges}
+          disabled={isLoading}
         >
-          Save Changes
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>

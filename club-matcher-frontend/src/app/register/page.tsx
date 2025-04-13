@@ -42,7 +42,6 @@ export default function Register() {
   });
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [error, setError] = useState('');
-  const [emailError, setEmailError] = useState('')
 
   // Toggle interest selection
   const toggleInterest = (interest: string) => {

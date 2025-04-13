@@ -1,6 +1,4 @@
-import Image from "next/image";
 import styles from "./page.module.css";
-import Link from "next/link";
 
 export default function Home() {
   return (
@@ -21,8 +19,8 @@ export default function Home() {
           <h2>Choose your account type</h2>
           
           <div className={styles.loginOptions}>
-            <Link href="/login/student" className={styles.loginButton}>
-              <Image
+            <a href="/login/student" className={styles.loginButton}>
+              <img
                 src="/student-icon.svg"
                 alt="Student Icon"
                 width={24}
@@ -30,10 +28,10 @@ export default function Home() {
                 className={styles.buttonIcon}
               />
               Login as Student
-            </Link>
+            </a>
 
-            <Link href="/login/club" className={styles.loginButton}>
-              <Image
+            <a href="/login/club" className={styles.loginButton}>
+              <img
                 src="/club-icon.svg"
                 alt="Club Icon"
                 width={24}
@@ -41,14 +39,14 @@ export default function Home() {
                 className={styles.buttonIcon}
               />
               Login as Club
-            </Link>
+            </a>
           </div>
 
           <p className={styles.registerText}>
             Don&apos;t have an account?{" "}
-            <Link href="/register" className={styles.registerLink}>
+            <a href="/register" className={styles.registerLink}>
               Register here
-            </Link>
+            </a>
           </p>
         </div>
       </main>

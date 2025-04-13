@@ -76,8 +76,13 @@ const INTERESTS_OPTIONS = [
 
 // Profile Section Component
 const ProfileSection = () => {
-  const [userData, setUserData] = useState(mockUserData);
-  const [selectedInterests, setSelectedInterests] = useState(userData.interests);
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    interests: [] as string[],
+    profilePicture: null as string | null
+  });
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [password, setPassword] = useState({
     current: '',
@@ -88,6 +93,50 @@ const ProfileSection = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  // Load user data from backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsDataLoading(true);
+        setLoadError('');
+        // Get student ID from sessionStorage
+        const storedId = sessionStorage.getItem('studentId');
+        const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+        const response = await fetch(`/api/profile/student/${studentId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Loaded student data:", data);
+          
+          setUserData({
+            name: data.name || '',
+            email: data.email || '',
+            interests: data.interests || [],
+            profilePicture: data.profile_picture
+          });
+          setSelectedInterests(data.interests || []);
+          if (data.profile_picture) {
+            setProfileImage(data.profile_picture);
+          }
+        } else {
+          const errorData = await response.json();
+          setLoadError(`Failed to load profile: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading profile:', errorData);
+        }
+      } catch (error) {
+        setLoadError('Failed to connect to server. Please try again later.');
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Handle interest toggle
   const toggleInterest = (interest: string) => {
@@ -134,17 +183,74 @@ const ProfileSection = () => {
   };
 
   // Save profile changes
-  const saveProfileChanges = () => {
-    // In a real app, you'd call an API to update the user data
-    setUserData({
-      ...userData,
-      interests: selectedInterests,
-      profilePicture: profileImage
-    });
-    
-    // Show success message
-    setSuccessMessage('Profile updated successfully!');
-    setTimeout(() => setSuccessMessage(''), 3000);
+  const saveProfileChanges = async () => {
+    setIsLoading(true);
+
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+      
+      const profileData = {
+        name: userData.name,
+        interests: selectedInterests,
+        profile_picture: profileImage
+      };
+
+      const response = await fetch(`/api/profile/student/${studentId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to update profile');
+      }
+
+      // Update local state
+      setUserData({
+        ...userData,
+        interests: selectedInterests,
+        profilePicture: profileImage
+      });
+      
+      // Show success message
+      setSuccessMessage('Profile updated successfully!');
+      
+      // Refresh data from server after 1 second (to allow database to update)
+      setTimeout(async () => {
+        try {
+          const storedId = sessionStorage.getItem('studentId');
+          const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+          const refreshResponse = await fetch(`/api/profile/student/${studentId}`);
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            setUserData({
+              name: refreshData.name || '',
+              email: refreshData.email || '',
+              interests: refreshData.interests || [],
+              profilePicture: refreshData.profile_picture
+            });
+            if (refreshData.profile_picture) {
+              setProfileImage(refreshData.profile_picture);
+            }
+            console.log("Profile data refreshed:", refreshData);
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing profile data:', refreshError);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSuccessMessage('Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
   };
 
   return (
@@ -156,110 +262,131 @@ const ProfileSection = () => {
           {successMessage}
         </div>
       )}
-      
-      <div className={styles.profileContainer}>
-        {/* Profile Picture Section */}
-        <div className={styles.profilePictureSection}>
-          <div 
-            className={styles.profilePicture}
-            onClick={() => fileInputRef.current?.click()}
-            style={{ backgroundImage: profileImage ? `url(${profileImage})` : 'none' }}
-          >
-            {!profileImage && <span>+</span>}
-          </div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImageChange} 
-            accept="image/*" 
-            style={{ display: 'none' }}
-          />
+
+      {loadError && (
+        <div className={styles.error}>
+          {loadError}
           <button 
-            className={styles.uploadButton}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => window.location.reload()} 
+            className={styles.retryButton}
           >
-            Upload Photo
+            Retry
           </button>
         </div>
+      )}
+      
+      {isDataLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loading}>Loading profile data...</div>
+        </div>
+      ) : (
+        <div className={styles.profileContainer}>
+          {/* Profile Picture Section */}
+          <div className={styles.profilePictureSection}>
+            <div 
+              className={styles.profilePicture}
+              onClick={() => fileInputRef.current?.click()}
+              style={{ backgroundImage: profileImage ? 
+                (profileImage.startsWith('data:') ? `url(${profileImage})` : `url('${profileImage}')`) 
+                : 'none' 
+              }}
+            >
+              {!profileImage && <span>+</span>}
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              accept="image/*" 
+              style={{ display: 'none' }}
+            />
+            <button 
+              className={styles.uploadButton}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Upload Photo
+            </button>
+          </div>
 
-        {/* Profile Info Section */}
-        <div className={styles.profileInfoSection}>
-          <div className={styles.formGroup}>
-            <label>Name</label>
-            <input 
-              type="text" 
-              value={userData.name} 
-              onChange={(e) => setUserData({...userData, name: e.target.value})}
-            />
-          </div>
-          
-          <div className={styles.formGroup}>
-            <label>Email</label>
-            <input 
-              type="email" 
-              value={userData.email} 
-              readOnly 
-              className={styles.readOnlyField}
-            />
-            <div className={styles.inputHelp}>Email cannot be changed</div>
-          </div>
-          
-          {/* Password Section */}
-          <div className={styles.formGroup}>
-            <div className={styles.passwordHeader}>
-              <label>Password</label>
-              <button 
-                type="button" 
-                className={styles.changePasswordButton}
-                onClick={() => setShowPasswordFields(!showPasswordFields)}
-              >
-                {showPasswordFields ? 'Cancel' : 'Change Password'}
-              </button>
+          {/* Profile Info Section */}
+          <div className={styles.profileInfoSection}>
+            <div className={styles.formGroup}>
+              <label>Name</label>
+              <input 
+                type="text" 
+                value={userData.name} 
+                onChange={(e) => setUserData({...userData, name: e.target.value})}
+              />
             </div>
             
-            {showPasswordFields && (
-              <div className={styles.passwordFields}>
-                {passwordError && <div className={styles.error}>{passwordError}</div>}
-                
-                <div className={styles.formGroup}>
-                  <label>Current Password</label>
-                  <input 
-                    type="password" 
-                    value={password.current} 
-                    onChange={(e) => setPassword({...password, current: e.target.value})}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>New Password</label>
-                  <input 
-                    type="password" 
-                    value={password.new} 
-                    onChange={(e) => setPassword({...password, new: e.target.value})}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label>Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    value={password.confirm} 
-                    onChange={(e) => setPassword({...password, confirm: e.target.value})}
-                  />
-                </div>
-                
+            <div className={styles.formGroup}>
+              <label>Email</label>
+              <input 
+                type="email" 
+                value={userData.email} 
+                readOnly 
+                className={styles.readOnlyField}
+              />
+              <div className={styles.inputHelp}>Email cannot be changed</div>
+            </div>
+            
+            {/* Password Section */}
+            <div className={styles.formGroup}>
+              <div className={styles.passwordHeader}>
+                <label>Password</label>
                 <button 
                   type="button" 
-                  className={styles.updatePasswordButton}
-                  onClick={handlePasswordChange}
+                  className={styles.changePasswordButton}
+                  onClick={() => setShowPasswordFields(!showPasswordFields)}
                 >
-                  Update Password
+                  {showPasswordFields ? 'Cancel' : 'Change Password'}
                 </button>
               </div>
-            )}
+              
+              {showPasswordFields && (
+                <div className={styles.passwordFields}>
+                  {passwordError && <div className={styles.error}>{passwordError}</div>}
+                  
+                  <div className={styles.formGroup}>
+                    <label>Current Password</label>
+                    <input 
+                      type="password" 
+                      value={password.current} 
+                      onChange={(e) => setPassword({...password, current: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>New Password</label>
+                    <input 
+                      type="password" 
+                      value={password.new} 
+                      onChange={(e) => setPassword({...password, new: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label>Confirm New Password</label>
+                    <input 
+                      type="password" 
+                      value={password.confirm} 
+                      onChange={(e) => setPassword({...password, confirm: e.target.value})}
+                    />
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className={styles.updatePasswordButton}
+                    onClick={handlePasswordChange}
+                  >
+                    Update Password
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       
       {/* Interests Section */}
       <div className={styles.interestsSection}>
@@ -281,8 +408,9 @@ const ProfileSection = () => {
         <button 
           className={styles.saveButton}
           onClick={saveProfileChanges}
+          disabled={isLoading}
         >
-          Save Changes
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>

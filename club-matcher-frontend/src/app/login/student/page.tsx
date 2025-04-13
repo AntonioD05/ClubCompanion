@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import styles from './page.module.css';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function StudentLogin() {
@@ -31,6 +30,10 @@ export default function StudentLogin() {
         throw new Error(data.detail || 'Login failed');
       }
 
+      // Store the student ID in sessionStorage
+      sessionStorage.setItem('studentId', data.id.toString());
+      sessionStorage.setItem('userEmail', email);
+      
       // Login successful
       router.push('/dashboard/student');
     } catch (err) {
@@ -49,9 +52,9 @@ export default function StudentLogin() {
       </div>
       
       <main className={styles.main}>
-        <Link href="/" className={styles.backButton}>
+        <a href="/" className={styles.backButton}>
           ← Back
-        </Link>
+        </a>
         <div className={styles.loginContainer}>
           <h1>Student Login</h1>
           
