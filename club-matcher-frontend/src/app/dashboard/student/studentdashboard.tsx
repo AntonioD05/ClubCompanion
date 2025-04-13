@@ -422,6 +422,10 @@ const SearchSection = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [memberFilter, setMemberFilter] = useState('');
   const [savedClubs, setSavedClubs] = useState<number[]>([]);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactMessage, setContactMessage] = useState('');
+  const [activeClubId, setActiveClubId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Filter clubs based on search query and filters
   const filteredClubs = mockClubs.filter(club => {
@@ -475,9 +479,72 @@ const SearchSection = () => {
       .slice(0, 2);
   };
 
+  // Open contact modal
+  const openContactModal = (clubId: number) => {
+    setActiveClubId(clubId);
+    setContactModalOpen(true);
+  };
+
+  // Send contact message
+  const sendContactMessage = async () => {
+    if (!contactMessage.trim() || !activeClubId) return;
+    
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const messageData = {
+        content: contactMessage,
+        recipient_id: activeClubId,
+        recipient_type: 'club'
+      };
+      
+      const response = await fetch(`/api/messages/student/${studentId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (response.ok) {
+        // Reset form and close modal
+        setContactMessage('');
+        setContactModalOpen(false);
+        setActiveClubId(null);
+        
+        // Show success message
+        setSuccessMessage('Message sent successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        
+        // Switch to messages tab to view the conversation
+        setTimeout(() => {
+          const setActiveTab = (tab: string) => {
+            const event = new CustomEvent('set-active-tab', { detail: tab });
+            document.dispatchEvent(event);
+          };
+          setActiveTab('messages');
+        }, 1500);
+      } else {
+        const errorData = await response.json();
+        setSuccessMessage(`Failed to send message: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setSuccessMessage('Failed to send message. Please try again.');
+    }
+  };
+
   return (
     <div className={styles.section}>
       <h2>Find Clubs</h2>
+      
+      {successMessage && (
+        <div className={styles.successMessage}>
+          {successMessage}
+        </div>
+      )}
       
       {/* Search and filters */}
       <div className={styles.searchBar}>
@@ -571,7 +638,10 @@ const SearchSection = () => {
                     <span key={interest} className={styles.clubTag}>{interest}</span>
                   ))}
                 </div>
-                <button className={styles.contactButton}>
+                <button 
+                  className={styles.contactButton}
+                  onClick={() => openContactModal(club.id)}
+                >
                   Contact Club
                 </button>
               </div>
@@ -594,6 +664,50 @@ const SearchSection = () => {
           </div>
         )}
       </div>
+      
+      {/* Contact Modal */}
+      {contactModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Contact {activeClubId ? mockClubs.find(c => c.id === activeClubId)?.name : 'Club'}</h3>
+              <button 
+                className={styles.closeModalButton}
+                onClick={() => setContactModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label>Message</label>
+                <textarea 
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  className={styles.contactTextarea}
+                  placeholder="Write your message here..."
+                  rows={4}
+                />
+              </div>
+              <div className={styles.modalActions}>
+                <button 
+                  className={styles.cancelButton}
+                  onClick={() => setContactModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className={styles.sendButton}
+                  onClick={sendContactMessage}
+                  disabled={!contactMessage.trim()}
+                >
+                  Send Message
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -646,20 +760,54 @@ const SavedClubsSection = () => {
   };
 
   // Send contact message
-  const sendContactMessage = () => {
+  const sendContactMessage = async () => {
     if (!contactMessage.trim() || !activeClubId) return;
     
-    // In a real app, you'd send this message via an API
-    console.log(`Sending message to club #${activeClubId}: ${contactMessage}`);
-    
-    // Reset the form and close modal
-    setContactMessage('');
-    setContactModalOpen(false);
-    setActiveClubId(null);
-    
-    // Show success message
-    setSuccessMessage('Message sent successfully!');
-    setTimeout(() => setSuccessMessage(''), 3000);
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const messageData = {
+        content: contactMessage,
+        recipient_id: activeClubId,
+        recipient_type: 'club'
+      };
+      
+      const response = await fetch(`/api/messages/student/${studentId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (response.ok) {
+        // Reset form and close modal
+        setContactMessage('');
+        setContactModalOpen(false);
+        setActiveClubId(null);
+        
+        // Show success message
+        setSuccessMessage('Message sent successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        
+        // Switch to messages tab to view the conversation
+        setTimeout(() => {
+          const setActiveTab = (tab: string) => {
+            const event = new CustomEvent('set-active-tab', { detail: tab });
+            document.dispatchEvent(event);
+          };
+          setActiveTab('messages');
+        }, 1500);
+      } else {
+        const errorData = await response.json();
+        setSuccessMessage(`Failed to send message: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setSuccessMessage('Failed to send message. Please try again.');
+    }
   };
 
   // Get active club
@@ -801,6 +949,348 @@ const SavedClubsSection = () => {
   );
 };
 
+// Messages Section Component
+const MessagesSection = () => {
+  const [threads, setThreads] = useState<any[]>([]);
+  const [activeConversation, setActiveConversation] = useState<any>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load message threads from backend
+  useEffect(() => {
+    const fetchMessageThreads = async () => {
+      try {
+        setIsLoading(true);
+        setLoadError('');
+        
+        // Get student ID from sessionStorage
+        const storedId = sessionStorage.getItem('studentId');
+        const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+        
+        const response = await fetch(`/api/messages/student/${studentId}/threads`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setThreads(data);
+        } else {
+          const errorData = await response.json();
+          setLoadError(`Failed to load messages: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading messages:', errorData);
+        }
+      } catch (error) {
+        setLoadError('Failed to connect to server. Please try again later.');
+        console.error('Error fetching message threads:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessageThreads();
+  }, []);
+
+  // Load conversation when a thread is selected
+  const loadConversation = async (contactId: number, contactType: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const response = await fetch(`/api/messages/student/${studentId}/conversation/${contactType}/${contactId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setActiveConversation(data);
+        
+        // Update thread read status in the threads list
+        setThreads(threads.map(thread => {
+          if (thread.contact_id === contactId && thread.contact_type === contactType) {
+            return {
+              ...thread,
+              unread_count: 0,
+              latest_message: {
+                ...thread.latest_message,
+                read: true
+              }
+            };
+          }
+          return thread;
+        }));
+        
+        // Scroll to bottom of messages after they load
+        setTimeout(() => {
+          if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+          }
+        }, 100);
+      } else {
+        const errorData = await response.json();
+        setLoadError(`Failed to load conversation: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setLoadError('Failed to load conversation. Please try again.');
+      console.error('Error loading conversation:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Send new message
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !activeConversation) return;
+    
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const messageData = {
+        content: newMessage,
+        recipient_id: activeConversation.other_user.id,
+        recipient_type: activeConversation.other_user.type
+      };
+      
+      const response = await fetch(`/api/messages/student/${studentId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (response.ok) {
+        // Clear input field
+        setNewMessage('');
+        
+        // Refresh conversation to include new message
+        loadConversation(activeConversation.other_user.id, activeConversation.other_user.type);
+        
+        // Also refresh threads to update latest message
+        const threadsResponse = await fetch(`/api/messages/student/${studentId}/threads`);
+        if (threadsResponse.ok) {
+          const threadsData = await threadsResponse.json();
+          setThreads(threadsData);
+        }
+      } else {
+        const errorData = await response.json();
+        setLoadError(`Failed to send message: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setLoadError('Failed to send message. Please try again.');
+      console.error('Error sending message:', error);
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  // Generate contact initials for avatar
+  const getContactInitials = (name: string) => {
+    if (!name) return '';
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <div className={styles.section}>
+      <h2>Messages</h2>
+      
+      {loadError && (
+        <div className={styles.error}>
+          {loadError}
+          <button 
+            onClick={() => window.location.reload()} 
+            className={styles.retryButton}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
+      <div className={styles.messagesContainer}>
+        {/* Conversations List */}
+        <div className={styles.threadsList}>
+          <div className={styles.threadsHeader}>
+            <h3>Conversations</h3>
+          </div>
+          
+          {isLoading && !activeConversation ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loading}>Loading conversations...</div>
+            </div>
+          ) : threads.length > 0 ? (
+            <div className={styles.threads}>
+              {threads.map(thread => (
+                <div 
+                  key={`${thread.contact_type}-${thread.contact_id}`}
+                  className={`${styles.threadItem} ${
+                    activeConversation?.other_user.id === thread.contact_id && 
+                    activeConversation?.other_user.type === thread.contact_type ? 
+                    styles.activeThread : ''
+                  } ${thread.unread_count > 0 ? styles.unreadThread : ''}`}
+                  onClick={() => loadConversation(thread.contact_id, thread.contact_type)}
+                >
+                  <div className={styles.contactAvatar}>
+                    {thread.contact_profile_picture ? (
+                      <div 
+                        className={styles.avatarImage} 
+                        style={{ backgroundImage: `url(${thread.contact_profile_picture})` }}
+                      />
+                    ) : (
+                      <div className={styles.avatarInitials}>
+                        {getContactInitials(thread.contact_name)}
+                      </div>
+                    )}
+                    {thread.unread_count > 0 && (
+                      <span className={styles.unreadBadge}>
+                        {thread.unread_count > 9 ? '9+' : thread.unread_count}
+                      </span>
+                    )}
+                  </div>
+                  <div className={styles.threadInfo}>
+                    <div className={styles.threadHeader}>
+                      <span className={styles.contactName}>{thread.contact_name}</span>
+                      <span className={styles.messageTime}>
+                        {formatDate(thread.latest_message.created_at)}
+                      </span>
+                    </div>
+                    <div className={styles.messagePreview}>
+                      {thread.latest_message.sent_by_me && <span>You: </span>}
+                      {thread.latest_message.content.length > 40 ? 
+                        thread.latest_message.content.substring(0, 40) + '...' : 
+                        thread.latest_message.content
+                      }
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.noMessages}>
+              <div className={styles.emptyStateIcon}>💬</div>
+              <p>No conversations yet</p>
+              <p className={styles.noMessagesHint}>
+                Start a conversation by contacting a club from the Find Clubs or Saved Clubs sections
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {/* Conversation View */}
+        <div className={styles.conversationView}>
+          {activeConversation ? (
+            <>
+              <div className={styles.conversationHeader}>
+                <div className={styles.contactInfo}>
+                  <div className={styles.contactAvatar}>
+                    {activeConversation.other_user.profile_picture ? (
+                      <div 
+                        className={styles.avatarImage} 
+                        style={{ backgroundImage: `url(${activeConversation.other_user.profile_picture})` }}
+                      />
+                    ) : (
+                      <div className={styles.avatarInitials}>
+                        {getContactInitials(activeConversation.other_user.name)}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className={styles.contactName}>{activeConversation.other_user.name}</h3>
+                </div>
+                <button
+                  className={styles.closeConversationButton}
+                  onClick={() => setActiveConversation(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <div className={styles.messagesView} ref={messageContainerRef}>
+                {activeConversation.messages.map((message: any) => (
+                  <div 
+                    key={message.id}
+                    className={`${styles.message} ${message.sent_by_me ? styles.sentMessage : styles.receivedMessage}`}
+                  >
+                    <div className={styles.messageContent}>
+                      {message.content}
+                      <div className={styles.messageTime}>
+                        {formatDate(message.created_at)}
+                        {message.sent_by_me && (
+                          <span className={styles.readStatus}>
+                            {message.read ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6L9 17l-5-5"/>
+                              </svg>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                              </svg>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className={styles.messageInputContainer}>
+                <textarea
+                  className={styles.messageInput}
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                />
+                <button 
+                  className={styles.sendButton}
+                  onClick={sendMessage}
+                  disabled={!newMessage.trim()}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className={styles.noConversationSelected}>
+              <div className={styles.emptyStateIcon}>📩</div>
+              <h3>Select a conversation</h3>
+              <p>Choose a conversation from the list to view messages</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -832,6 +1322,7 @@ export default function StudentDashboard() {
         {activeTab === 'profile' && <ProfileSection />}
         {activeTab === 'search' && <SearchSection />}
         {activeTab === 'saved' && <SavedClubsSection />}
+        {activeTab === 'messages' && <MessagesSection />}
       </main>
 
       <nav className={styles.navBar}>
@@ -865,6 +1356,16 @@ export default function StudentDashboard() {
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
           <span>Saved</span>
+        </button>
+        
+        <button 
+          className={`${styles.navButton} ${activeTab === 'messages' ? styles.active : ''}`}
+          onClick={() => setActiveTab('messages')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Messages</span>
         </button>
       </nav>
     </div>

@@ -4,6 +4,7 @@ import os
 from routes.login_routes import router as login_router
 from routes.registration_routes import router as registration_router
 from routes.profile_routes import router as profile_router
+from routes.messaging_routes import router as messaging_router
 '''
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
@@ -31,6 +32,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(login_router, prefix="/api")
 app.include_router(registration_router, prefix="/api")
 app.include_router(profile_router, prefix="/api")
+app.include_router(messaging_router, prefix="/api")
 
 @app.get("/")
 def read_root():
