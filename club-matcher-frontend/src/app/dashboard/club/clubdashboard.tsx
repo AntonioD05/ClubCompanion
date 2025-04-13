@@ -3,67 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './clubdashboard.module.css';
 
-// Mock club data - in a real application, this would come from an API
-const mockClubData = {
-  name: 'Engineering Club',
-  email: 'engineering@ufl.edu',
-  description: 'A club for engineering students at UF',
-  interests: ['Technology', 'Science', 'Academic'],
-  profilePicture: null
-};
-
-// Mock members data
-const mockMembers = [
-  { 
-    id: 1, 
-    name: 'Alice Johnson', 
-    email: 'alice@ufl.edu', 
-    joinDate: '2023-01-15',
-    profilePicture: null 
-  },
-  { 
-    id: 2, 
-    name: 'Bob Smith', 
-    email: 'bob@ufl.edu', 
-    joinDate: '2023-02-03',
-    profilePicture: null 
-  },
-  { 
-    id: 3, 
-    name: 'Charlie Brown', 
-    email: 'charlie@ufl.edu', 
-    joinDate: '2023-02-20',
-    profilePicture: null 
-  },
-];
-
-// Mock messages data
-const mockMessages = [
-  { 
-    id: 1, 
-    sender: 'Emily Davis', 
-    email: 'emily@ufl.edu', 
-    message: 'Hi, I\'m interested in joining your club. Could you tell me when the next meeting is?', 
-    date: '2023-04-01T14:30:00Z',
-    read: true
-  },
-  { 
-    id: 2, 
-    sender: 'David Wilson', 
-    email: 'david@ufl.edu', 
-    message: 'Do you have any events planned for the upcoming semester?', 
-    date: '2023-04-02T09:15:00Z',
-    read: false
-  },
-  { 
-    id: 3, 
-    sender: 'Michael Brown', 
-    email: 'michael@ufl.edu', 
-    message: 'I have experience in robotics competitions. Would that be relevant for your club?', 
-    date: '2023-04-02T16:45:00Z',
-    read: false
-  }
-];
+// Add an interface for Member
+interface Member {
+  id: number;
+  name: string;
+  email: string;
+  joinDate: string;
+  profilePicture: string | null;
+}
 
 // Profile Section Component
 const ProfileSection = () => {
@@ -456,58 +403,168 @@ const ProfileSection = () => {
 
 // Messages Section Component
 const MessagesSection = () => {
-  const [messages, setMessages] = useState(mockMessages);
-  const [activeMessage, setActiveMessage] = useState<number | null>(null);
-  const [replyText, setReplyText] = useState('');
+  const [threads, setThreads] = useState<any[]>([]);
+  const [activeConversation, setActiveConversation] = useState<any>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const messageContainerRef = useRef<HTMLDivElement>(null);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Mark a message as read when opened
-  const openMessage = (id: number) => {
-    setActiveMessage(id);
-    setMessages(messages.map(msg => 
-      msg.id === id ? { ...msg, read: true } : msg
-    ));
+  // Load message threads from backend
+  useEffect(() => {
+    const fetchMessageThreads = async () => {
+      try {
+        setIsLoading(true);
+        setLoadError('');
+        
+        // Get club ID from sessionStorage
+        const storedId = sessionStorage.getItem('clubId');
+        const clubId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+        
+        const response = await fetch(`/api/messages/club/${clubId}/threads`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Loaded threads:", data);
+          setThreads(data);
+        } else {
+          const errorData = await response.json();
+          setLoadError(`Failed to load messages: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading messages:', errorData);
+        }
+      } catch (error) {
+        setLoadError('Failed to connect to server. Please try again later.');
+        console.error('Error fetching message threads:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessageThreads();
+  }, []);
+
+  // Load conversation when a thread is selected
+  const loadConversation = async (contactId: number, contactType: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Get club ID from sessionStorage
+      const storedId = sessionStorage.getItem('clubId');
+      const clubId = storedId ? parseInt(storedId) : 1;
+      
+      const response = await fetch(`/api/messages/club/${clubId}/conversation/${contactType}/${contactId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setActiveConversation(data);
+        
+        // Update thread read status in the threads list
+        setThreads(threads.map(thread => {
+          if (thread.contact_id === contactId && thread.contact_type === contactType) {
+            return {
+              ...thread,
+              unread_count: 0,
+              latest_message: {
+                ...thread.latest_message,
+                read: true
+              }
+            };
+          }
+          return thread;
+        }));
+        
+        // Scroll to bottom of messages after they load
+        setTimeout(() => {
+          if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+          }
+        }, 100);
+      } else {
+        const errorData = await response.json();
+        setLoadError(`Failed to load conversation: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setLoadError('Failed to load conversation. Please try again.');
+      console.error('Error loading conversation:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Close the active message
-  const closeMessage = () => {
-    setActiveMessage(null);
-    setReplyText('');
+  // Send new message
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !activeConversation) return;
+    
+    try {
+      // Get club ID from sessionStorage
+      const storedId = sessionStorage.getItem('clubId');
+      const clubId = storedId ? parseInt(storedId) : 1;
+      
+      const messageData = {
+        content: newMessage,
+        recipient_id: activeConversation.other_user.id,
+        recipient_type: activeConversation.other_user.type
+      };
+      
+      const response = await fetch(`/api/messages/club/${clubId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (response.ok) {
+        // Clear input field
+        setNewMessage('');
+        
+        // Refresh conversation to include new message
+        loadConversation(activeConversation.other_user.id, activeConversation.other_user.type);
+        
+        // Also refresh threads to update latest message
+        const threadsResponse = await fetch(`/api/messages/club/${clubId}/threads`);
+        if (threadsResponse.ok) {
+          const threadsData = await threadsResponse.json();
+          setThreads(threadsData);
+        }
+      } else {
+        const errorData = await response.json();
+        setLoadError(`Failed to send message: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setLoadError('Failed to send message. Please try again.');
+      console.error('Error sending message:', error);
+    }
   };
 
-  // Send a reply (in a real app, this would call an API)
-  const sendReply = () => {
-    if (!replyText.trim() || !activeMessage) return;
-    
-    console.log(`Sending reply to message #${activeMessage}: ${replyText}`);
-    
-    // Remove the message from the list
-    const updatedMessages = messages.filter(msg => msg.id !== activeMessage);
-    setMessages(updatedMessages);
-    setReplyText('');
-    setActiveMessage(null);
-    
-    // Show success message briefly
-    setSuccessMessage('Reply sent successfully!');
-    setTimeout(() => {
-      setSuccessMessage('');
-    }, 3000);
-  };
-
-  // Get the active message object
-  const currentMessage = activeMessage 
-    ? messages.find(msg => msg.id === activeMessage) 
-    : null;
-
-  // Format date to a readable format
+  // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  // Generate contact initials for avatar
+  const getContactInitials = (name: string) => {
+    if (!name) return '';
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
     <div className={styles.section}>
-      <h2>Student Messages</h2>
+      <h2>Messages</h2>
       
       {successMessage && (
         <div className={styles.successMessage}>
@@ -515,98 +572,241 @@ const MessagesSection = () => {
         </div>
       )}
       
-      {messages.length > 0 ? (
-        <>
-          {!activeMessage ? (
-            <div className={styles.messagesList}>
-              {messages.map(message => (
+      {loadError && (
+        <div className={styles.error}>
+          {loadError}
+          <button 
+            onClick={() => window.location.reload()} 
+            className={styles.retryButton}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
+      <div className={styles.messagesContainer}>
+        {/* Conversations List */}
+        <div className={styles.threadsList}>
+          <div className={styles.threadsHeader}>
+            <h3>Conversations</h3>
+          </div>
+          
+          {isLoading && !activeConversation ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loading}>Loading conversations...</div>
+            </div>
+          ) : threads.length > 0 ? (
+            <div className={styles.threads}>
+              {threads.map(thread => (
                 <div 
-                  key={message.id} 
-                  className={`${styles.messageItem} ${!message.read ? styles.unread : ''}`}
-                  onClick={() => openMessage(message.id)}
+                  key={`${thread.contact_type}-${thread.contact_id}`}
+                  className={`${styles.threadItem} ${
+                    activeConversation?.other_user.id === thread.contact_id && 
+                    activeConversation?.other_user.type === thread.contact_type ? 
+                    styles.activeThread : ''
+                  } ${thread.unread_count > 0 ? styles.unreadThread : ''}`}
+                  onClick={() => loadConversation(thread.contact_id, thread.contact_type)}
                 >
-                  <div className={styles.messageSender}>
-                    {!message.read && <span className={styles.unreadDot}></span>}
-                    {message.sender}
+                  <div className={styles.contactAvatar}>
+                    {thread.contact_profile_picture ? (
+                      <div 
+                        className={styles.avatarImage} 
+                        style={{ 
+                          backgroundImage: `url('${thread.contact_profile_picture.startsWith('http') ? 
+                            thread.contact_profile_picture : 
+                            `/${thread.contact_profile_picture}`}')`
+                        }}
+                      />
+                    ) : (
+                      <div className={styles.avatarInitials}>
+                        {getContactInitials(thread.contact_name)}
+                      </div>
+                    )}
+                    {thread.unread_count > 0 && (
+                      <span className={styles.unreadBadge}>
+                        {thread.unread_count > 9 ? '9+' : thread.unread_count}
+                      </span>
+                    )}
                   </div>
-                  <div className={styles.messagePreview}>
-                    {message.message.length > 60 
-                      ? message.message.substring(0, 60) + '...' 
-                      : message.message
-                    }
-                  </div>
-                  <div className={styles.messageDate}>
-                    {new Date(message.date).toLocaleDateString()}
+                  <div className={styles.threadInfo}>
+                    <div className={styles.threadHeader}>
+                      <span className={styles.contactName}>{thread.contact_name}</span>
+                      <span className={styles.messageTime}>
+                        {formatDate(thread.latest_message.created_at)}
+                      </span>
+                    </div>
+                    <div className={styles.messagePreview}>
+                      {thread.latest_message.sent_by_me && <span>You: </span>}
+                      {thread.latest_message.content.length > 40 ? 
+                        thread.latest_message.content.substring(0, 40) + '...' : 
+                        thread.latest_message.content
+                      }
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className={styles.messageDetail}>
-              <div className={styles.messageHeader}>
-                <button 
-                  className={styles.backButton}
-                  onClick={closeMessage}
+            <div className={styles.noMessages}>
+              <div className={styles.emptyStateIcon}>💬</div>
+              <p>No conversations yet</p>
+              <p className={styles.noMessagesHint}>
+                When students contact your club, conversations will appear here
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {/* Conversation View */}
+        <div className={styles.conversationView}>
+          {activeConversation ? (
+            <>
+              <div className={styles.conversationHeader}>
+                <div className={styles.contactInfo}>
+                  <div className={styles.contactAvatar}>
+                    {activeConversation.other_user.profile_picture ? (
+                      <div 
+                        className={styles.avatarImage} 
+                        style={{ 
+                          backgroundImage: `url('${activeConversation.other_user.profile_picture.startsWith('http') ? 
+                            activeConversation.other_user.profile_picture : 
+                            `/${activeConversation.other_user.profile_picture}`}')`
+                        }}
+                      />
+                    ) : (
+                      <div className={styles.avatarInitials}>
+                        {getContactInitials(activeConversation.other_user.name)}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className={styles.contactName}>{activeConversation.other_user.name}</h3>
+                </div>
+                <button
+                  className={styles.closeConversationButton}
+                  onClick={() => setActiveConversation(null)}
                 >
-                  ← Back to messages
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
                 </button>
               </div>
               
-              <div className={styles.messageContent}>
-                <div className={styles.messageInfo}>
-                  <h3>{currentMessage?.sender}</h3>
-                  <div className={styles.messageEmail}>{currentMessage?.email}</div>
-                  <div className={styles.messageTime}>
-                    {currentMessage?.date ? formatDate(currentMessage.date) : ''}
+              <div className={styles.messagesView} ref={messageContainerRef}>
+                {activeConversation.messages.map((message: any) => (
+                  <div 
+                    key={message.id}
+                    className={`${styles.message} ${message.sent_by_me ? styles.sentMessage : styles.receivedMessage}`}
+                  >
+                    <div className={styles.messageContent}>
+                      {message.content}
+                      <div className={styles.messageTime}>
+                        {formatDate(message.created_at)}
+                        {message.sent_by_me && (
+                          <span className={styles.readStatus}>
+                            {message.read ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6L9 17l-5-5"/>
+                              </svg>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                              </svg>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className={styles.messageBody}>
-                  {currentMessage?.message}
-                </div>
-                
-                <div className={styles.replyContainer}>
-                  <h4>Reply</h4>
-                  <textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Type your response here..."
-                    className={styles.replyTextarea}
-                    rows={4}
-                  />
-                  <div className={styles.replyActions}>
-                    <button 
-                      className={styles.sendButton}
-                      onClick={sendReply}
-                      disabled={!replyText.trim()}
-                    >
-                      Send Reply
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
+              
+              <div className={styles.messageInputContainer}>
+                <textarea
+                  className={styles.messageInput}
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                />
+                <button 
+                  className={styles.sendButton}
+                  onClick={sendMessage}
+                  disabled={!newMessage.trim()}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className={styles.noConversationSelected}>
+              <div className={styles.emptyStateIcon}>📩</div>
+              <h3>Select a conversation</h3>
+              <p>Choose a conversation from the list to view messages</p>
             </div>
           )}
-        </>
-      ) : (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyStateIcon}>📩</div>
-          <p>No messages yet</p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 // Members Section Component
 const MembersSection = () => {
-  const [members] = useState(mockMembers);
+  const [members, setMembers] = useState<Member[]>([]);
   const [selectedMember, setSelectedMember] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  
+  // Fetch members data from API
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        setIsLoading(true);
+        setLoadError('');
+        
+        // Get club ID from sessionStorage
+        const storedId = sessionStorage.getItem('clubId');
+        const clubId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+        
+        const response = await fetch(`/api/club/${clubId}/members`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data);
+        } else {
+          const errorData = await response.json();
+          setLoadError(`Failed to load members: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading members:', errorData);
+          // Fallback to empty array if API fails
+          setMembers([]);
+        }
+      } catch (error) {
+        setLoadError('Failed to connect to server. Please try again later.');
+        console.error('Error fetching members:', error);
+        // Fallback to empty array on error
+        setMembers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
   
   // Generate initials from name
   const getInitials = (name: string) => {
+    if (!name) return '';
     return name
       .split(' ')
       .map(part => part[0])
@@ -626,18 +826,45 @@ const MembersSection = () => {
   };
 
   // Send message to member
-  const sendMessageToMember = () => {
+  const sendMessageToMember = async () => {
     if (!messageText.trim() || !selectedMember) return;
     
-    console.log(`Sending message to member #${selectedMember}: ${messageText}`);
-    setMessageText('');
-    
-    // Show success message briefly
-    setSuccessMessage('Message sent successfully!');
-    setTimeout(() => {
-      setSuccessMessage('');
-      closeMemberDetails();
-    }, 2000);
+    try {
+      // Get club ID from sessionStorage
+      const storedId = sessionStorage.getItem('clubId');
+      const clubId = storedId ? parseInt(storedId) : 1;
+      
+      const messageData = {
+        content: messageText,
+        recipient_id: selectedMember,
+        recipient_type: 'student'
+      };
+      
+      const response = await fetch(`/api/messages/club/${clubId}/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (response.ok) {
+        // Show success message briefly
+        setSuccessMessage('Message sent successfully!');
+        setMessageText('');
+        
+        setTimeout(() => {
+          setSuccessMessage('');
+          closeMemberDetails();
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        setLoadError(`Failed to send message: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setLoadError('Failed to send message. Please try again.');
+      console.error('Error sending message:', error);
+    }
   };
 
   // Get the selected member
@@ -655,7 +882,23 @@ const MembersSection = () => {
         </div>
       )}
       
-      {!selectedMember ? (
+      {loadError && (
+        <div className={styles.error}>
+          {loadError}
+          <button 
+            onClick={() => window.location.reload()} 
+            className={styles.retryButton}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
+      {isLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loading}>Loading members...</div>
+        </div>
+      ) : !selectedMember ? (
         <div className={styles.tableContainer}>
           {members.length > 0 ? (
             <table className={styles.membersTable}>

@@ -3,8 +3,18 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './studentdashboard.module.css';
 
+// Define Club interface for type safety
+interface Club {
+  id: number;
+  name: string;
+  description: string;
+  interests: string[];
+  members: number;
+  profilePicture: string | null;
+}
+
 // Mock club data
-const mockClubs = [
+const mockClubs: Club[] = [
   {
     id: 1,
     name: 'Engineering Club',
@@ -426,9 +436,44 @@ const SearchSection = () => {
   const [contactMessage, setContactMessage] = useState('');
   const [activeClubId, setActiveClubId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch clubs from API
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        setIsLoading(true);
+        setError('');
+        
+        const response = await fetch('/api/clubs');
+        
+        if (response.ok) {
+          const data = await response.json();
+          setClubs(data);
+        } else {
+          const errorData = await response.json();
+          setError(`Failed to load clubs: ${errorData.detail || 'Unknown error'}`);
+          console.error('Error loading clubs:', errorData);
+          // Fallback to mock data if API fails
+          setClubs(mockClubs);
+        }
+      } catch (error) {
+        setError('Failed to connect to server. Using sample data instead.');
+        console.error('Error fetching clubs:', error);
+        // Fallback to mock data on error
+        setClubs(mockClubs);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchClubs();
+  }, []);
 
   // Filter clubs based on search query and filters
-  const filteredClubs = mockClubs.filter(club => {
+  const filteredClubs = clubs.filter(club => {
     // Filter by search query
     const matchesSearch = searchQuery === '' || 
       club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -546,6 +591,12 @@ const SearchSection = () => {
         </div>
       )}
       
+      {error && (
+        <div className={styles.error}>
+          {error}
+        </div>
+      )}
+      
       {/* Search and filters */}
       <div className={styles.searchBar}>
         <input
@@ -595,7 +646,11 @@ const SearchSection = () => {
       <div className={styles.clubResults}>
         <h3>Results ({filteredClubs.length} clubs found)</h3>
         
-        {filteredClubs.length > 0 ? (
+        {isLoading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.loading}>Loading clubs...</div>
+          </div>
+        ) : filteredClubs.length > 0 ? (
           <div className={styles.clubsList}>
             {filteredClubs.map(club => (
               <div key={club.id} className={styles.clubCard}>
@@ -1151,7 +1206,7 @@ const MessagesSection = () => {
                     {thread.contact_profile_picture ? (
                       <div 
                         className={styles.avatarImage} 
-                        style={{ backgroundImage: `url(${thread.contact_profile_picture})` }}
+                        style={{ backgroundImage: `url(${thread.contact_profile_picture.startsWith('data:') || thread.contact_profile_picture.startsWith('http') ? thread.contact_profile_picture : `/${thread.contact_profile_picture}`})` }}
                       />
                     ) : (
                       <div className={styles.avatarInitials}>
@@ -1203,7 +1258,7 @@ const MessagesSection = () => {
                     {activeConversation.other_user.profile_picture ? (
                       <div 
                         className={styles.avatarImage} 
-                        style={{ backgroundImage: `url(${activeConversation.other_user.profile_picture})` }}
+                        style={{ backgroundImage: `url(${activeConversation.other_user.profile_picture.startsWith('data:') || activeConversation.other_user.profile_picture.startsWith('http') ? activeConversation.other_user.profile_picture : `/${activeConversation.other_user.profile_picture}`})` }}
                       />
                     ) : (
                       <div className={styles.avatarInitials}>

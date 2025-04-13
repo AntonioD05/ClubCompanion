@@ -712,3 +712,301 @@
   .retryButton:hover {
     background-color: #c82333;
   }
+  
+  /* Messages Container */
+  .messagesContainer {
+    display: flex;
+    height: 70vh;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  /* Threads List */
+  .threadsList {
+    width: 35%;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .threadsHeader {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .threads {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .threadItem {
+    display: flex;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .threadItem:hover {
+    background-color: var(--background-light);
+  }
+  
+  .activeThread {
+    background-color: var(--primary-light);
+  }
+  
+  .unreadThread {
+    background-color: var(--background-hover);
+  }
+  
+  .contactAvatar {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    margin-right: 1rem;
+    border-radius: 50%;
+    background-color: var(--background-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .avatarImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .avatarInitials {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primary);
+  }
+  
+  .unreadBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--secondary);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .threadInfo {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .threadHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+  }
+  
+  .contactName {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .messageTime {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-left: 0.5rem;
+  }
+  
+  .messagePreview {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Conversation View */
+  .conversationView {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .conversationHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .contactInfo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .contactInfo .contactName {
+    margin-left: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .closeConversationButton {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    transition: color 0.2s;
+  }
+  
+  .closeConversationButton:hover {
+    color: var(--foreground);
+  }
+  
+  .messagesView {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .message {
+    max-width: 75%;
+  }
+  
+  .sentMessage {
+    align-self: flex-end;
+  }
+  
+  .receivedMessage {
+    align-self: flex-start;
+  }
+  
+  .messageContent {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    position: relative;
+  }
+  
+  .sentMessage .messageContent {
+    background-color: var(--primary);
+    color: white;
+    border-top-right-radius: 0.25rem;
+  }
+  
+  .receivedMessage .messageContent {
+    background-color: var(--background-light);
+    border-top-left-radius: 0.25rem;
+  }
+  
+  .sentMessage .messageTime {
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .receivedMessage .messageTime {
+    text-align: left;
+    margin-top: 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .readStatus {
+    display: flex;
+    align-items: center;
+  }
+  
+  .messageInputContainer {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .messageInput {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    padding: 0.75rem 1rem;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: border-color 0.2s;
+  }
+  
+  .messageInput:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .sendButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: flex-end;
+  }
+  
+  .sendButton:disabled {
+    background-color: var(--background-light);
+    color: var(--text-muted);
+    cursor: default;
+  }
+  
+  .noConversationSelected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .noMessages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .noMessagesHint {
+    font-size: 0.85rem;
+    max-width: 240px;
+    margin-top: 0.5rem;
+  }
