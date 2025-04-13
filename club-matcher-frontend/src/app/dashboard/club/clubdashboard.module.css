@@ -1010,3 +1010,34 @@
     max-width: 240px;
     margin-top: 0.5rem;
   }
+  
+  .interestTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .interestTagsLarge {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .memberDetailInterests {
+    margin-bottom: 1.5rem;
+  }
+
+  .memberDetailInterests .interestTag {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    cursor: default;
+    margin-bottom: 0.5rem;
+  }
+
+  .memberDetailInterests .interestTag:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    transform: none;
+  }

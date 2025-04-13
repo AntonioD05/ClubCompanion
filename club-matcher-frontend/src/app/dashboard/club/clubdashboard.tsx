@@ -9,7 +9,9 @@ interface Member {
   name: string;
   email: string;
   joinDate: string;
-  profilePicture: string | null;
+  profile_picture: string | null;
+  interests: string[];
+  saved_at: string;
 }
 
 // Profile Section Component
@@ -19,7 +21,7 @@ const ProfileSection = () => {
     email: '',
     description: '',
     interests: [] as string[],
-    profilePicture: null as string | null
+    profile_picture: null as string | null
   });
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -57,7 +59,7 @@ const ProfileSection = () => {
             email: data.email || '',
             description: data.description || '',
             interests: data.interests || [],
-            profilePicture: data.profile_picture
+            profile_picture: data.profile_picture
           });
           setSelectedInterests(data.interests || []);
           if (data.profile_picture) {
@@ -160,7 +162,7 @@ const ProfileSection = () => {
       setClubData({
         ...clubData,
         interests: selectedInterests,
-        profilePicture: profileImage as null
+        profile_picture: profileImage as null
       });
       
       // Show success message
@@ -179,7 +181,7 @@ const ProfileSection = () => {
               email: refreshData.email || '',
               description: refreshData.description || '',
               interests: refreshData.interests || [],
-              profilePicture: refreshData.profile_picture
+              profile_picture: refreshData.profile_picture
             });
             if (refreshData.profile_picture) {
               setProfileImage(refreshData.profile_picture);
@@ -783,6 +785,7 @@ const MembersSection = () => {
         
         if (response.ok) {
           const data = await response.json();
+          console.log("Loaded club members:", data);
           setMembers(data);
         } else {
           const errorData = await response.json();
@@ -871,10 +874,21 @@ const MembersSection = () => {
   const currentMember = selectedMember 
     ? members.find(member => member.id === selectedMember) 
     : null;
+    
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
 
   return (
     <div className={styles.section}>
-      <h2>Club Members</h2>
+      <h2>Students Who Saved Your Club</h2>
       
       {successMessage && (
         <div className={styles.successMessage}>
@@ -896,7 +910,7 @@ const MembersSection = () => {
       
       {isLoading ? (
         <div className={styles.loadingContainer}>
-          <div className={styles.loading}>Loading members...</div>
+          <div className={styles.loading}>Loading students...</div>
         </div>
       ) : !selectedMember ? (
         <div className={styles.tableContainer}>
@@ -904,9 +918,9 @@ const MembersSection = () => {
             <table className={styles.membersTable}>
               <thead>
                 <tr>
-                  <th>Member</th>
-                  <th>Email</th>
-                  <th>Join Date</th>
+                  <th>Student</th>
+                  <th>Interests</th>
+                  <th>Saved Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -916,10 +930,10 @@ const MembersSection = () => {
                     <td>
                       <div className={styles.memberInfo}>
                         <div className={styles.memberAvatar}>
-                          {member.profilePicture ? (
+                          {member.profile_picture ? (
                             <div 
                               className={styles.avatarImage} 
-                              style={{ backgroundImage: `url(${member.profilePicture})` }}
+                              style={{ backgroundImage: `url(${member.profile_picture})` }}
                             />
                           ) : (
                             <div className={styles.avatarInitials}>
@@ -930,14 +944,27 @@ const MembersSection = () => {
                         <div className={styles.memberName}>{member.name}</div>
                       </div>
                     </td>
-                    <td>{member.email}</td>
-                    <td>{new Date(member.joinDate).toLocaleDateString()}</td>
+                    <td>
+                      <div className={styles.interestTags}>
+                        {member.interests && member.interests.length > 0 ? (
+                          member.interests.slice(0, 3).map(interest => (
+                            <span key={interest} className={styles.interestTag}>{interest}</span>
+                          ))
+                        ) : (
+                          <span className={styles.noInterests}>No interests listed</span>
+                        )}
+                        {member.interests && member.interests.length > 3 && (
+                          <span className={styles.moreInterests}>+{member.interests.length - 3} more</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>{formatDate(member.saved_at)}</td>
                     <td>
                       <button 
                         className={styles.actionButton}
                         onClick={() => viewMemberDetails(member.id)}
                       >
-                        View Details
+                        Message
                       </button>
                     </td>
                   </tr>
@@ -947,7 +974,8 @@ const MembersSection = () => {
           ) : (
             <div className={styles.emptyState}>
               <div className={styles.emptyStateIcon}>👥</div>
-              <p>No members yet</p>
+              <p>No students have saved your club yet</p>
+              <p className={styles.emptyStateSubtext}>When students save your club, they'll appear here</p>
             </div>
           )}
         </div>
@@ -958,16 +986,16 @@ const MembersSection = () => {
               className={styles.backButton}
               onClick={closeMemberDetails}
             >
-              ← Back to members
+              ← Back to students
             </button>
           </div>
           
           <div className={styles.memberDetailContent}>
             <div className={styles.memberDetailAvatar}>
-              {currentMember?.profilePicture ? (
+              {currentMember?.profile_picture ? (
                 <div 
                   className={styles.largeAvatarImage} 
-                  style={{ backgroundImage: `url(${currentMember.profilePicture})` }}
+                  style={{ backgroundImage: `url(${currentMember.profile_picture})` }}
                 />
               ) : (
                 <div className={styles.largeAvatarInitials}>
@@ -978,9 +1006,22 @@ const MembersSection = () => {
             
             <div className={styles.memberDetailInfo}>
               <h3>{currentMember?.name}</h3>
-              <div className={styles.memberDetailEmail}>{currentMember?.email}</div>
+              
+              <div className={styles.memberDetailInterests}>
+                <h4>Interests</h4>
+                <div className={styles.interestTagsLarge}>
+                  {currentMember?.interests && currentMember.interests.length > 0 ? (
+                    currentMember.interests.map(interest => (
+                      <span key={interest} className={styles.interestTag}>{interest}</span>
+                    ))
+                  ) : (
+                    <span className={styles.noInterests}>No interests listed</span>
+                  )}
+                </div>
+              </div>
+              
               <div className={styles.memberDetailJoined}>
-                Joined on {new Date(currentMember?.joinDate || '').toLocaleDateString()}
+                Saved on {formatDate(currentMember?.saved_at || '')}
               </div>
               
               <div className={styles.messageContainer}>
@@ -1011,7 +1052,25 @@ const MembersSection = () => {
 };
 
 export default function ClubDashboard() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Try to get the saved tab from sessionStorage on initial load
+    if (typeof window !== 'undefined') {
+      const savedTab = sessionStorage.getItem('clubActiveTab');
+      return savedTab || 'profile';
+    }
+    return 'profile';
+  });
+
+  // Save the active tab to sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('clubActiveTab', activeTab);
+  }, [activeTab]);
+
+  // Update tab handler to also save to sessionStorage
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    sessionStorage.setItem('clubActiveTab', tab);
+  };
 
   return (
     <div className={styles.dashboardContainer}>
@@ -1031,7 +1090,7 @@ export default function ClubDashboard() {
       <nav className={styles.navBar}>
         <button 
           className={`${styles.navButton} ${activeTab === 'profile' ? styles.active : ''}`}
-          onClick={() => setActiveTab('profile')}
+          onClick={() => handleTabChange('profile')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -1042,7 +1101,7 @@ export default function ClubDashboard() {
         
         <button 
           className={`${styles.navButton} ${activeTab === 'messages' ? styles.active : ''}`}
-          onClick={() => setActiveTab('messages')}
+          onClick={() => handleTabChange('messages')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -1052,7 +1111,7 @@ export default function ClubDashboard() {
         
         <button 
           className={`${styles.navButton} ${activeTab === 'members' ? styles.active : ''}`}
-          onClick={() => setActiveTab('members')}
+          onClick={() => handleTabChange('members')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>

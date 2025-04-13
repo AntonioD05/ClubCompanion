@@ -134,4 +134,79 @@ async def get_club_by_id(club_id: int):
         if cur:
             cur.close()
         if conn:
+            conn.close()
+
+@router.get("/club/{club_id}/members")
+async def get_club_members(club_id: int):
+    """
+    Retrieves all students who have saved the club.
+    """
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if club exists
+        cur.execute("SELECT id FROM clubs WHERE id = %s", (club_id,))
+        club = cur.fetchone()
+        
+        if not club:
+            raise HTTPException(status_code=404, detail="Club not found")
+        
+        # Get all students who have saved this club
+        cur.execute("""
+            SELECT 
+                s.id, 
+                s.name, 
+                s.interests,
+                s.profile_picture,
+                sc.saved_at
+            FROM 
+                saved_clubs sc
+            JOIN 
+                students s ON sc.student_id = s.id
+            WHERE
+                sc.club_id = %s
+            ORDER BY 
+                sc.saved_at DESC
+        """, (club_id,))
+        
+        members = []
+        for row in cur.fetchall():
+            # Convert row to dictionary and format profile picture URL if needed
+            member = dict(row)
+            
+            # If profile picture exists, format the URL
+            if member['profile_picture']:
+                # Format the profile picture URL
+                profile_picture = member['profile_picture']
+                
+                # Debug output - print original path and formatted path
+                print(f"Original student profile picture path: {profile_picture}")
+                
+                # Ensure consistent formatting
+                if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
+                    member['profile_picture'] = f"/{profile_picture}"
+                elif not profile_picture.startswith(('http://', 'https://', '/')):
+                    member['profile_picture'] = f"/uploads/student_profile_pictures/{profile_picture}"
+                
+                print(f"Formatted student profile picture path: {member['profile_picture']}")
+            
+            # Convert saved_at timestamp to string for JSON serialization
+            if member['saved_at']:
+                member['saved_at'] = member['saved_at'].isoformat()
+                
+            members.append(member)
+            
+        return members
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if cur:
+            cur.close()
+        if conn:
             conn.close() 

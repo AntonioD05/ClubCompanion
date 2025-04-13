@@ -1510,13 +1510,28 @@ const MessagesSection = () => {
 };
 
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Try to get the saved tab from sessionStorage on initial load
+    if (typeof window !== 'undefined') {
+      const savedTab = sessionStorage.getItem('studentActiveTab');
+      return savedTab || 'profile';
+    }
+    return 'profile';
+  });
 
   // Add event listener for the custom event
   useEffect(() => {
     const handleSetActiveTab = (event: CustomEvent) => {
       setActiveTab(event.detail);
+      // Save the active tab to sessionStorage whenever it changes
+      sessionStorage.setItem('studentActiveTab', event.detail);
     };
+
+    // Save the active tab to sessionStorage whenever it changes directly
+    const saveTab = () => {
+      sessionStorage.setItem('studentActiveTab', activeTab);
+    };
+    saveTab();
 
     // Add event listener
     document.addEventListener('set-active-tab', handleSetActiveTab as EventListener);
@@ -1525,7 +1540,13 @@ export default function StudentDashboard() {
     return () => {
       document.removeEventListener('set-active-tab', handleSetActiveTab as EventListener);
     };
-  }, []);
+  }, [activeTab]);
+
+  // Update tab handler to also save to sessionStorage
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    sessionStorage.setItem('studentActiveTab', tab);
+  };
 
   return (
     <div className={styles.dashboardContainer}>
@@ -1546,7 +1567,7 @@ export default function StudentDashboard() {
       <nav className={styles.navBar}>
         <button 
           className={`${styles.navButton} ${activeTab === 'profile' ? styles.active : ''}`}
-          onClick={() => setActiveTab('profile')}
+          onClick={() => handleTabChange('profile')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -1557,7 +1578,7 @@ export default function StudentDashboard() {
         
         <button 
           className={`${styles.navButton} ${activeTab === 'search' ? styles.active : ''}`}
-          onClick={() => setActiveTab('search')}
+          onClick={() => handleTabChange('search')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -1568,7 +1589,7 @@ export default function StudentDashboard() {
         
         <button 
           className={`${styles.navButton} ${activeTab === 'saved' ? styles.active : ''}`}
-          onClick={() => setActiveTab('saved')}
+          onClick={() => handleTabChange('saved')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
@@ -1578,7 +1599,7 @@ export default function StudentDashboard() {
         
         <button 
           className={`${styles.navButton} ${activeTab === 'messages' ? styles.active : ''}`}
-          onClick={() => setActiveTab('messages')}
+          onClick={() => handleTabChange('messages')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
