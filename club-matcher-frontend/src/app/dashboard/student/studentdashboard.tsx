@@ -440,6 +440,28 @@ const SearchSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Fetch saved clubs status
+  const fetchSavedClubsStatus = async () => {
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const response = await fetch(`/api/student/${studentId}/saved-clubs`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Extract club IDs from saved clubs
+        const savedIds = data.map((club: any) => club.id);
+        setSavedClubs(savedIds);
+      } else {
+        console.error('Error loading saved clubs');
+      }
+    } catch (error) {
+      console.error('Error fetching saved clubs:', error);
+    }
+  };
+
   // Fetch clubs from API
   useEffect(() => {
     const fetchClubs = async () => {
@@ -451,7 +473,19 @@ const SearchSection = () => {
         
         if (response.ok) {
           const data = await response.json();
-          setClubs(data);
+          // Map API data to Club interface
+          const mappedClubs = data.map((club: any) => ({
+            id: club.id,
+            name: club.name,
+            description: club.description,
+            interests: club.interests,
+            members: club.members,
+            profilePicture: club.profile_picture
+          }));
+          setClubs(mappedClubs);
+          
+          // After loading clubs, fetch saved clubs status
+          await fetchSavedClubsStatus();
         } else {
           const errorData = await response.json();
           setError(`Failed to load clubs: ${errorData.detail || 'Unknown error'}`);
@@ -506,11 +540,49 @@ const SearchSection = () => {
   };
 
   // Toggle saving a club
-  const toggleSaveClub = (clubId: number) => {
-    if (savedClubs.includes(clubId)) {
-      setSavedClubs(savedClubs.filter(id => id !== clubId));
-    } else {
-      setSavedClubs([...savedClubs, clubId]);
+  const toggleSaveClub = async (clubId: number) => {
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      if (savedClubs.includes(clubId)) {
+        // Unsave the club
+        const response = await fetch(`/api/student/${studentId}/unsave-club/${clubId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          setSavedClubs(savedClubs.filter(id => id !== clubId));
+          setSuccessMessage('Club removed from saved');
+        } else {
+          setSuccessMessage('Failed to remove club from saved');
+        }
+      } else {
+        // Save the club
+        const response = await fetch(`/api/student/${studentId}/save-club/${clubId}`, {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          setSavedClubs([...savedClubs, clubId]);
+          setSuccessMessage('Club saved successfully');
+        } else {
+          setSuccessMessage('Failed to save club');
+        }
+      }
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+      // This will notify the SavedClubsSection to refresh
+      const event = new CustomEvent('saved-clubs-changed');
+      document.dispatchEvent(event);
+      
+    } catch (error) {
+      console.error('Error toggling saved club:', error);
+      setSuccessMessage('Error processing request');
+      setTimeout(() => setSuccessMessage(''), 3000);
     }
   };
 
@@ -659,7 +731,7 @@ const SearchSection = () => {
                     {club.profilePicture ? (
                       <div 
                         className={styles.clubAvatarImage} 
-                        style={{ backgroundImage: `url(${club.profilePicture})` }}
+                        style={{ backgroundImage: `url(${club.profilePicture.startsWith('data:') || club.profilePicture.startsWith('http') ? club.profilePicture : club.profilePicture})` }}
                       />
                     ) : (
                       <div className={styles.clubAvatarInitials}>
@@ -725,7 +797,7 @@ const SearchSection = () => {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
-              <h3>Contact {activeClubId ? mockClubs.find(c => c.id === activeClubId)?.name : 'Club'}</h3>
+              <h3>Contact {activeClubId ? filteredClubs.find(c => c.id === activeClubId)?.name : 'Club'}</h3>
               <button 
                 className={styles.closeModalButton}
                 onClick={() => setContactModalOpen(false)}
@@ -768,15 +840,71 @@ const SearchSection = () => {
 };
 
 const SavedClubsSection = () => {
-  const [savedClubIds, setSavedClubIds] = useState<number[]>([1, 3, 5]); // Mock saved club IDs
+  const [savedClubs, setSavedClubs] = useState<Club[]>([]);
   const [expandedClubId, setExpandedClubId] = useState<number | null>(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
   const [activeClubId, setActiveClubId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Filter mock clubs to only show saved ones
-  const savedClubs = mockClubs.filter(club => savedClubIds.includes(club.id));
+  // Fetch saved clubs from API
+  const fetchSavedClubs = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const response = await fetch(`/api/student/${studentId}/saved-clubs`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Map API data to Club interface
+        const mappedClubs = data.map((club: any) => ({
+          id: club.id,
+          name: club.name,
+          description: club.description,
+          interests: club.interests || [],
+          members: club.members || 0,
+          profilePicture: club.profile_picture
+        }));
+        setSavedClubs(mappedClubs);
+      } else {
+        const errorData = await response.json();
+        setError(`Failed to load saved clubs: ${errorData.detail || 'Unknown error'}`);
+        console.error('Error loading saved clubs:', errorData);
+        setSavedClubs([]); // Empty the list on error
+      }
+    } catch (error) {
+      setError('Failed to connect to server. Please try again later.');
+      console.error('Error fetching saved clubs:', error);
+      setSavedClubs([]); // Empty the list on error
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Listen for saved-clubs-changed event
+  useEffect(() => {
+    const handleSavedClubsChanged = () => {
+      fetchSavedClubs();
+    };
+    
+    // Add event listener
+    document.addEventListener('saved-clubs-changed', handleSavedClubsChanged);
+    
+    // Initial fetch
+    fetchSavedClubs();
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('saved-clubs-changed', handleSavedClubsChanged);
+    };
+  }, []);
 
   // Generate club initials for avatar
   const getClubInitials = (name: string) => {
@@ -789,13 +917,38 @@ const SavedClubsSection = () => {
   };
 
   // Remove club from saved
-  const removeFromSaved = (clubId: number, event: React.MouseEvent) => {
+  const removeFromSaved = async (clubId: number, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent expanding the club card
-    setSavedClubIds(savedClubIds.filter(id => id !== clubId));
     
-    // Show success message
-    setSuccessMessage('Club removed from saved');
-    setTimeout(() => setSuccessMessage(''), 3000);
+    try {
+      // Get student ID from sessionStorage
+      const storedId = sessionStorage.getItem('studentId');
+      const studentId = storedId ? parseInt(storedId) : 1;
+      
+      const response = await fetch(`/api/student/${studentId}/unsave-club/${clubId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        // Remove from local state
+        setSavedClubs(savedClubs.filter(club => club.id !== clubId));
+        
+        // Show success message
+        setSuccessMessage('Club removed from saved');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        
+        // Dispatch event to notify SearchSection that saved clubs changed
+        const event = new CustomEvent('saved-clubs-changed');
+        document.dispatchEvent(event);
+      } else {
+        setSuccessMessage('Failed to remove club from saved');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error removing saved club:', error);
+      setSuccessMessage('Error removing club from saved');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
   };
 
   // Toggle expanded club view
@@ -866,7 +1019,7 @@ const SavedClubsSection = () => {
   };
 
   // Get active club
-  const activeClub = activeClubId ? mockClubs.find(club => club.id === activeClubId) : null;
+  const activeClub = activeClubId ? savedClubs.find(club => club.id === activeClubId) : null;
 
   return (
     <div className={styles.section}>
@@ -878,7 +1031,17 @@ const SavedClubsSection = () => {
         </div>
       )}
       
-      {savedClubs.length > 0 ? (
+      {error && (
+        <div className={styles.error}>
+          {error}
+        </div>
+      )}
+      
+      {isLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loading}>Loading clubs...</div>
+        </div>
+      ) : savedClubs.length > 0 ? (
         <div className={styles.savedClubsList}>
           {savedClubs.map(club => (
             <div 
@@ -891,7 +1054,7 @@ const SavedClubsSection = () => {
                   {club.profilePicture ? (
                     <div 
                       className={styles.clubAvatarImage} 
-                      style={{ backgroundImage: `url(${club.profilePicture})` }}
+                      style={{ backgroundImage: `url(${club.profilePicture.startsWith('data:') || club.profilePicture.startsWith('http') ? club.profilePicture : club.profilePicture})` }}
                     />
                   ) : (
                     <div className={styles.clubAvatarInitials}>

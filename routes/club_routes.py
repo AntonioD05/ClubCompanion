@@ -16,18 +16,24 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get all clubs without trying to count members
+        # Get all clubs with member count based on saved_clubs table
         cur.execute("""
             SELECT 
-                id, 
-                name, 
-                description, 
-                interests,
-                profile_picture
+                c.id, 
+                c.name, 
+                c.description, 
+                c.interests,
+                c.profile_picture,
+                COALESCE(sc.member_count, 0) as members
             FROM 
-                clubs
+                clubs c
+            LEFT JOIN (
+                SELECT club_id, COUNT(*) as member_count 
+                FROM saved_clubs 
+                GROUP BY club_id
+            ) sc ON c.id = sc.club_id
             ORDER BY 
-                name
+                c.name
         """)
         
         clubs = []
@@ -37,12 +43,20 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
             
             # If profile picture exists, format the URL
             if club['profile_picture']:
-                if not club['profile_picture'].startswith(('http://', 'https://', '/')):
-                    club['profile_picture'] = f"/uploads/club_profile_pictures/{club['profile_picture']}"
-            
-            # Generate a random number between 10 and 100 for testing
-            club['members'] = (club['id'] * 13) % 90 + 10
+                # Make sure paths start with / for frontend consistency
+                profile_picture = club['profile_picture']
                 
+                # Debug output - print original path and formatted path
+                print(f"Original profile picture path: {profile_picture}")
+                
+                # Ensure consistent formatting
+                if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
+                    club['profile_picture'] = f"/{profile_picture}"
+                elif not profile_picture.startswith(('http://', 'https://', '/')):
+                    club['profile_picture'] = f"/uploads/club_profile_pictures/{profile_picture}"
+                
+                print(f"Formatted profile picture path: {club['profile_picture']}")
+            
             clubs.append(club)
             
         return clubs
@@ -66,17 +80,24 @@ async def get_club_by_id(club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Get specific club with member count based on saved_clubs table
         cur.execute("""
             SELECT 
-                id, 
-                name, 
-                description, 
-                interests,
-                profile_picture
+                c.id, 
+                c.name, 
+                c.description, 
+                c.interests,
+                c.profile_picture,
+                COALESCE(sc.member_count, 0) as members
             FROM 
-                clubs
+                clubs c
+            LEFT JOIN (
+                SELECT club_id, COUNT(*) as member_count 
+                FROM saved_clubs 
+                GROUP BY club_id
+            ) sc ON c.id = sc.club_id
             WHERE
-                id = %s
+                c.id = %s
         """, (club_id,))
         
         club = cur.fetchone()
@@ -89,12 +110,20 @@ async def get_club_by_id(club_id: int):
         
         # If profile picture exists, format the URL
         if club['profile_picture']:
-            if not club['profile_picture'].startswith(('http://', 'https://', '/')):
-                club['profile_picture'] = f"/uploads/club_profile_pictures/{club['profile_picture']}"
-        
-        # Generate a random number between 10 and 100 for testing
-        club['members'] = (club['id'] * 13) % 90 + 10
+            # Make sure paths start with / for frontend consistency
+            profile_picture = club['profile_picture']
             
+            # Debug output - print original path and formatted path
+            print(f"Original profile picture path: {profile_picture}")
+            
+            # Ensure consistent formatting
+            if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
+                club['profile_picture'] = f"/{profile_picture}"
+            elif not profile_picture.startswith(('http://', 'https://', '/')):
+                club['profile_picture'] = f"/uploads/club_profile_pictures/{profile_picture}"
+            
+            print(f"Formatted profile picture path: {club['profile_picture']}")
+        
         return club
         
     except HTTPException as he:
