@@ -124,9 +124,11 @@ async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
         cur.execute(
             """
             SELECT c.id, c.name, c.description, c.interests, c.profile_picture,
-                   (SELECT COUNT(*) FROM saved_clubs WHERE club_id = c.id) as members
+                   (SELECT COUNT(*) FROM saved_clubs WHERE club_id = c.id) as members,
+                   a.email
             FROM saved_clubs sc
             JOIN clubs c ON sc.club_id = c.id
+            JOIN auth_credentials a ON c.auth_id = a.id
             WHERE sc.student_id = %s
             ORDER BY sc.saved_at DESC
             """,
@@ -162,7 +164,8 @@ async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
                 "description": club["description"],
                 "interests": club["interests"],
                 "profile_picture": profile_picture_url,
-                "members": club["members"]
+                "members": club["members"],
+                "email": club["email"]
             })
         
         return formatted_clubs

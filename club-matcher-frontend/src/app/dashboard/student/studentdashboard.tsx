@@ -11,6 +11,7 @@ interface Club {
   interests: string[];
   members: number;
   profilePicture: string | null;
+  email: string;
 }
 
 // Mock club data
@@ -21,7 +22,8 @@ const mockClubs: Club[] = [
     description: 'A club for students interested in all fields of engineering and technology.',
     interests: ['Technology', 'Science', 'Academic'],
     members: 45,
-    profilePicture: null
+    profilePicture: null,
+    email: ''
   },
   {
     id: 2,
@@ -29,7 +31,8 @@ const mockClubs: Club[] = [
     description: 'Join us for various sports activities, tournaments, and fitness sessions.',
     interests: ['Sports', 'Health'],
     members: 78,
-    profilePicture: null
+    profilePicture: null,
+    email: ''
   },
   {
     id: 3,
@@ -37,7 +40,8 @@ const mockClubs: Club[] = [
     description: 'Express your creativity through various art forms and exhibitions.',
     interests: ['Arts', 'Cultural'],
     members: 32,
-    profilePicture: null
+    profilePicture: null,
+    email: ''
   },
   {
     id: 4,
@@ -45,7 +49,8 @@ const mockClubs: Club[] = [
     description: 'Enhance your public speaking and argumentation skills through competitive debates.',
     interests: ['Academic', 'Social'],
     members: 24,
-    profilePicture: null
+    profilePicture: null,
+    email: ''
   },
   {
     id: 5,
@@ -53,7 +58,8 @@ const mockClubs: Club[] = [
     description: 'Working towards campus sustainability and environmental awareness.',
     interests: ['Environmental', 'Social'],
     members: 38,
-    profilePicture: null
+    profilePicture: null,
+    email: ''
   }
 ];
 
@@ -265,7 +271,7 @@ const ProfileSection = () => {
 
   return (
     <div className={styles.section}>
-      <h2>My Profile</h2>
+      <h2 suppressHydrationWarning={true}>My Profile</h2>
       
       {successMessage && (
         <div className={styles.successMessage}>
@@ -480,7 +486,8 @@ const SearchSection = () => {
             description: club.description,
             interests: club.interests,
             members: club.members,
-            profilePicture: club.profile_picture
+            profilePicture: club.profile_picture,
+            email: club.email
           }));
           setClubs(mappedClubs);
           
@@ -655,7 +662,7 @@ const SearchSection = () => {
 
   return (
     <div className={styles.section}>
-      <h2>Find Clubs</h2>
+      <h2 suppressHydrationWarning={true}>Find Clubs</h2>
       
       {successMessage && (
         <div className={styles.successMessage}>
@@ -839,6 +846,90 @@ const SearchSection = () => {
   );
 };
 
+// Add this ClubProfileModal component right after the SavedClubsSection component definition but before the MessagesSection
+const ClubProfileModal = ({ club, onClose }: { club: Club | null, onClose: () => void }) => {
+  if (!club) return null;
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={`${styles.modal} ${styles.profileModal}`} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h3>Club Profile</h3>
+          <button onClick={onClose} className={styles.closeButton}>×</button>
+        </div>
+        <div className={styles.modalBody}>
+          <div className={styles.clubProfileHeader}>
+            <div className={styles.clubProfileAvatar}>
+              {club.profilePicture ? (
+                <div 
+                  className={styles.largeAvatarImage} 
+                  style={{ backgroundImage: `url(${club.profilePicture})` }}
+                />
+              ) : (
+                <div className={styles.largeAvatarInitials}>
+                  {getInitials(club.name)}
+                </div>
+              )}
+            </div>
+            <div className={styles.clubProfileInfo}>
+              <h2 className={styles.clubProfileName}>{club.name}</h2>
+              <p className={styles.clubProfileMembers}>{club.members} members</p>
+            </div>
+          </div>
+
+          <div className={styles.clubProfileSection}>
+            <h4>About</h4>
+            <p className={styles.clubProfileDescription}>
+              {club.description || "No description provided."}
+            </p>
+          </div>
+
+          {club.interests && club.interests.length > 0 && (
+            <div className={styles.clubProfileSection}>
+              <h4>Interests</h4>
+              <div className={styles.clubProfileTags}>
+                {club.interests.map((interest: string, idx: number) => (
+                  <div key={idx} className={styles.interestTag}>
+                    {interest}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.clubProfileSection}>
+            <h4>Contact</h4>
+            <p><strong>Email:</strong> {club.email || "No email provided."}</p>
+          </div>
+          
+          <div className={styles.actionButtons}>
+            <button 
+              className={styles.contactButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+                // Add logic to open contact modal if needed
+              }}
+            >
+              Contact Club
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Now update the SavedClubsSection to use the ClubProfileModal
 const SavedClubsSection = () => {
   const [savedClubs, setSavedClubs] = useState<Club[]>([]);
   const [expandedClubId, setExpandedClubId] = useState<number | null>(null);
@@ -848,6 +939,8 @@ const SavedClubsSection = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedClubForProfile, setSelectedClubForProfile] = useState<Club | null>(null);
 
   // Fetch saved clubs from API
   const fetchSavedClubs = async () => {
@@ -870,7 +963,8 @@ const SavedClubsSection = () => {
           description: club.description,
           interests: club.interests || [],
           members: club.members || 0,
-          profilePicture: club.profile_picture
+          profilePicture: club.profile_picture,
+          email: club.email
         }));
         setSavedClubs(mappedClubs);
       } else {
@@ -1018,12 +1112,25 @@ const SavedClubsSection = () => {
     }
   };
 
+  // Open club profile modal
+  const openProfileModal = (club: Club, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent expanding the club card
+    setSelectedClubForProfile(club);
+    setProfileModalOpen(true);
+  };
+
+  // Close club profile modal
+  const closeProfileModal = () => {
+    setProfileModalOpen(false);
+    setSelectedClubForProfile(null);
+  };
+
   // Get active club
   const activeClub = activeClubId ? savedClubs.find(club => club.id === activeClubId) : null;
 
   return (
     <div className={styles.section}>
-      <h2>Saved Clubs</h2>
+      <h2 suppressHydrationWarning={true}>Saved Clubs</h2>
       
       {successMessage && (
         <div className={styles.successMessage}>
@@ -1092,7 +1199,10 @@ const SavedClubsSection = () => {
                     >
                       Contact Club
                     </button>
-                    <button className={styles.viewDetailsButton}>
+                    <button 
+                      className={styles.viewDetailsButton}
+                      onClick={(e) => openProfileModal(club, e)}
+                    >
                       View Full Profile
                     </button>
                   </div>
@@ -1162,6 +1272,14 @@ const SavedClubsSection = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Club Profile Modal */}
+      {profileModalOpen && selectedClubForProfile && (
+        <ClubProfileModal 
+          club={selectedClubForProfile} 
+          onClose={closeProfileModal} 
+        />
       )}
     </div>
   );
@@ -1328,7 +1446,7 @@ const MessagesSection = () => {
 
   return (
     <div className={styles.section}>
-      <h2>Messages</h2>
+      <h2 suppressHydrationWarning={true}>Messages</h2>
       
       {loadError && (
         <div className={styles.error}>
@@ -1557,7 +1675,7 @@ export default function StudentDashboard() {
         </a>
       </header>
 
-      <main className={styles.main}>
+      <main className={styles.main} suppressHydrationWarning={true}>
         {activeTab === 'profile' && <ProfileSection />}
         {activeTab === 'search' && <SearchSection />}
         {activeTab === 'saved' && <SavedClubsSection />}

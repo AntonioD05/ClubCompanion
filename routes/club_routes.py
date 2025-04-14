@@ -24,7 +24,8 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
                 c.description, 
                 c.interests,
                 c.profile_picture,
-                COALESCE(sc.member_count, 0) as members
+                COALESCE(sc.member_count, 0) as members,
+                a.email
             FROM 
                 clubs c
             LEFT JOIN (
@@ -32,6 +33,7 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
                 FROM saved_clubs 
                 GROUP BY club_id
             ) sc ON c.id = sc.club_id
+            LEFT JOIN auth_credentials a ON c.auth_id = a.id
             ORDER BY 
                 c.name
         """)
@@ -88,7 +90,8 @@ async def get_club_by_id(club_id: int):
                 c.description, 
                 c.interests,
                 c.profile_picture,
-                COALESCE(sc.member_count, 0) as members
+                COALESCE(sc.member_count, 0) as members,
+                a.email
             FROM 
                 clubs c
             LEFT JOIN (
@@ -96,6 +99,7 @@ async def get_club_by_id(club_id: int):
                 FROM saved_clubs 
                 GROUP BY club_id
             ) sc ON c.id = sc.club_id
+            LEFT JOIN auth_credentials a ON c.auth_id = a.id
             WHERE
                 c.id = %s
         """, (club_id,))

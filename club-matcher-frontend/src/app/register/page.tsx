@@ -107,7 +107,7 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} suppressHydrationWarning>
       <div className={styles.backgroundShapes}>
         <div className={styles.shape}></div>
         <div className={styles.shape}></div>
@@ -126,6 +126,7 @@ export default function Register() {
             <button 
               onClick={() => setIsClub(!isClub)} 
               className={`${styles.switch} ${isClub ? styles.switchActive : ''}`}
+              suppressHydrationWarning
             >
               <span className={styles.slider} />
             </button>
@@ -134,7 +135,7 @@ export default function Register() {
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form} suppressHydrationWarning>
             <div className={styles.formGroup}>
               <label htmlFor="email">Email {!isClub && "(UF email required)"}</label>
               <input
@@ -207,7 +208,7 @@ export default function Register() {
               />
             </div>
 
-            <button type="submit" className={styles.submitButton}>
+            <button type="submit" className={styles.submitButton} suppressHydrationWarning>
               Create Account
             </button>
           </form>

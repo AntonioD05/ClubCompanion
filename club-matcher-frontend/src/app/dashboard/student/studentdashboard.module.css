@@ -1059,3 +1059,84 @@
     max-height: 50vh;
   }
 }
+
+/* Club Profile Modal Styles */
+.profileModal {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.clubProfileHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+}
+
+.clubProfileAvatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid var(--primary);
+}
+
+.clubProfileInfo {
+  flex: 1;
+}
+
+.clubProfileName {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.clubProfileMembers {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.clubProfileSection {
+  margin-bottom: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.clubProfileSection h4 {
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.clubProfileDescription {
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.clubProfileTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Ensure largeAvatarImage and largeAvatarInitials styles are defined */
+.largeAvatarImage {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.largeAvatarInitials {
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 2rem;
+}
