@@ -66,12 +66,7 @@ DB_HOST=localhost
 mkdir -p uploads/student_profile_pictures uploads/club_profile_pictures
 ```
 
-6. (Optional) Add test data to the database:
-```bash
-python create_test_data.py
-```
-
-7. Run the FastAPI backend:
+6. Run the FastAPI backend:
 ```bash
 uvicorn main:app --reload
 ```
