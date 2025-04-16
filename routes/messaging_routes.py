@@ -11,7 +11,6 @@ from typing import List, Optional
 
 router = APIRouter()
 
-# Student message routes
 @router.post("/messages/student/{student_id}/send")
 async def send_message_from_student(
     student_id: int,
@@ -79,7 +78,7 @@ async def get_student_conversation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Club message routes
+
 @router.post("/messages/club/{club_id}/send")
 async def send_message_from_club(
     club_id: int,

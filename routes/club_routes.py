@@ -16,7 +16,6 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get all clubs with member count based on saved_clubs table
         cur.execute("""
             SELECT 
                 c.id, 
@@ -40,18 +39,12 @@ async def get_all_clubs() -> List[Dict[str, Any]]:
         
         clubs = []
         for row in cur.fetchall():
-            # Convert row to dictionary and format profile picture URL if needed
             club = dict(row)
-            
-            # If profile picture exists, format the URL
             if club['profile_picture']:
-                # Make sure paths start with / for frontend consistency
-                profile_picture = club['profile_picture']
                 
-                # Debug output - print original path and formatted path
+                profile_picture = club['profile_picture']
                 print(f"Original profile picture path: {profile_picture}")
                 
-                # Ensure consistent formatting
                 if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
                     club['profile_picture'] = f"/{profile_picture}"
                 elif not profile_picture.startswith(('http://', 'https://', '/')):
@@ -82,7 +75,6 @@ async def get_club_by_id(club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get specific club with member count based on saved_clubs table
         cur.execute("""
             SELECT 
                 c.id, 
@@ -109,18 +101,16 @@ async def get_club_by_id(club_id: int):
         if not club:
             raise HTTPException(status_code=404, detail="Club not found")
         
-        # Convert row to dictionary and format profile picture URL if needed
         club = dict(club)
         
-        # If profile picture exists, format the URL
+        
         if club['profile_picture']:
-            # Make sure paths start with / for frontend consistency
+           
             profile_picture = club['profile_picture']
             
-            # Debug output - print original path and formatted path
+           
             print(f"Original profile picture path: {profile_picture}")
             
-            # Ensure consistent formatting
             if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
                 club['profile_picture'] = f"/{profile_picture}"
             elif not profile_picture.startswith(('http://', 'https://', '/')):
@@ -151,14 +141,12 @@ async def get_club_members(club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Check if club exists
         cur.execute("SELECT id FROM clubs WHERE id = %s", (club_id,))
         club = cur.fetchone()
         
         if not club:
             raise HTTPException(status_code=404, detail="Club not found")
         
-        # Get all students who have saved this club
         cur.execute("""
             SELECT 
                 s.id, 
@@ -178,18 +166,17 @@ async def get_club_members(club_id: int):
         
         members = []
         for row in cur.fetchall():
-            # Convert row to dictionary and format profile picture URL if needed
+           
             member = dict(row)
             
-            # If profile picture exists, format the URL
+            
             if member['profile_picture']:
-                # Format the profile picture URL
+                
                 profile_picture = member['profile_picture']
                 
-                # Debug output - print original path and formatted path
+               
                 print(f"Original student profile picture path: {profile_picture}")
                 
-                # Ensure consistent formatting
                 if 'uploads/' in profile_picture and not profile_picture.startswith('/uploads/'):
                     member['profile_picture'] = f"/{profile_picture}"
                 elif not profile_picture.startswith(('http://', 'https://', '/')):
@@ -197,7 +184,7 @@ async def get_club_members(club_id: int):
                 
                 print(f"Formatted student profile picture path: {member['profile_picture']}")
             
-            # Convert saved_at timestamp to string for JSON serialization
+           
             if member['saved_at']:
                 member['saved_at'] = member['saved_at'].isoformat()
                 

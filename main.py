@@ -24,11 +24,11 @@ from dotenv import load_dotenv
 app = FastAPI()
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Create uploads directory if it doesn't exist
+
 os.makedirs("uploads/student_profile_pictures", exist_ok=True)
 os.makedirs("uploads/club_profile_pictures", exist_ok=True)
 
-# Mount static files directory
+
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(login_router, prefix="/api")

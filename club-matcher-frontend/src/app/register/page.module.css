@@ -151,9 +151,8 @@
   background: var(--secondary-hover);
 }
 
-/* Add all the same shape and animation styles as above */
 
-/* Interest selection styles */
+
 .interestsHint {
   color: var(--text-muted);
   margin-bottom: 0.75rem;
@@ -187,7 +186,7 @@
   border-color: var(--primary);
 }
 
-/* Error message style */
+
 .error {
   background-color: rgba(220, 53, 69, 0.1);
   color: #dc3545;

@@ -6,19 +6,19 @@ import os
 from typing import Optional
 import uuid
 
-# Function to save profile image to disk
+
 async def save_profile_image(base64_image: str, user_id: int, user_type: str) -> str:
     if not base64_image:
         print(f"No image data provided for {user_type} {user_id}")
         return None
     
     try:
-        # Create directory if it doesn't exist
+        
         upload_dir = f"uploads/{user_type}_profile_pictures"
         os.makedirs(upload_dir, exist_ok=True)
         print(f"Upload directory: {upload_dir}")
         
-        # Extract the image data from base64 string (removes the "data:image/jpeg;base64," part)
+        
         if "," in base64_image:
             content_type, image_data = base64_image.split(",", 1)
             print(f"Content type: {content_type}")
@@ -26,8 +26,8 @@ async def save_profile_image(base64_image: str, user_id: int, user_type: str) ->
             image_data = base64_image
             print("No content type in base64 string")
         
-        # Generate unique filename
-        image_ext = "jpg"  # Default extension
+       
+        image_ext = "jpg" 
         if "image/png" in base64_image:
             image_ext = "png"
         elif "image/jpeg" in base64_image or "image/jpg" in base64_image:
@@ -37,7 +37,7 @@ async def save_profile_image(base64_image: str, user_id: int, user_type: str) ->
         file_path = f"{upload_dir}/{filename}"
         print(f"Saving image to: {file_path}")
         
-        # Save the image to disk
+        
         with open(file_path, "wb") as f:
             f.write(base64.b64decode(image_data))
             print(f"Image saved successfully")
@@ -58,7 +58,7 @@ async def get_student_profile(student_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get student info
+        
         cur.execute(
             """
             SELECT s.id, s.name, s.interests, s.profile_picture, a.email
@@ -73,10 +73,10 @@ async def get_student_profile(student_id: int):
         if not student:
             raise HTTPException(status_code=404, detail="Student not found")
         
-        # Check if profile picture exists and is accessible
+    
         profile_picture_url = None
         if student["profile_picture"]:
-            # Convert the file path to URL
+            
             profile_picture_url = f"/uploads/{os.path.basename(os.path.dirname(student['profile_picture']))}/{os.path.basename(student['profile_picture'])}"
         
         return {
@@ -108,7 +108,7 @@ async def get_club_profile(club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get club info
+       
         cur.execute(
             """
             SELECT c.id, c.name, c.description, c.interests, c.profile_picture, a.email
@@ -123,10 +123,9 @@ async def get_club_profile(club_id: int):
         if not club:
             raise HTTPException(status_code=404, detail="Club not found")
         
-        # Check if profile picture exists and is accessible
+       
         profile_picture_url = None
         if club["profile_picture"]:
-            # Convert the file path to URL
             profile_picture_url = f"/uploads/{os.path.basename(os.path.dirname(club['profile_picture']))}/{os.path.basename(club['profile_picture'])}"
         
         return {
@@ -159,7 +158,7 @@ async def update_student_profile(student_id: int, profile_data: ProfileUpdate):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # First get the auth_id for the student
+       
         cur.execute(
             "SELECT auth_id FROM students WHERE id = %s",
             (student_id,)
@@ -171,7 +170,7 @@ async def update_student_profile(student_id: int, profile_data: ProfileUpdate):
         
         auth_id = result["auth_id"]
         
-        # Handle profile picture upload if provided
+       
         profile_pic_path = None
         if profile_data.profile_picture:
             profile_pic_path = await save_profile_image(
@@ -180,7 +179,7 @@ async def update_student_profile(student_id: int, profile_data: ProfileUpdate):
                 "student"
             )
         
-        # Update the student record
+       
         update_fields = []
         update_values = []
         
@@ -232,7 +231,7 @@ async def update_club_profile(club_id: int, profile_data: ProfileUpdate):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # First get the auth_id for the club
+       
         cur.execute(
             "SELECT auth_id FROM clubs WHERE id = %s",
             (club_id,)
@@ -244,7 +243,7 @@ async def update_club_profile(club_id: int, profile_data: ProfileUpdate):
         
         auth_id = result["auth_id"]
         
-        # Handle profile picture upload if provided
+       
         profile_pic_path = None
         if profile_data.profile_picture:
             profile_pic_path = await save_profile_image(
@@ -253,7 +252,7 @@ async def update_club_profile(club_id: int, profile_data: ProfileUpdate):
                 "club"
             )
         
-        # Update the club record
+        
         update_fields = []
         update_values = []
         

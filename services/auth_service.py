@@ -3,7 +3,6 @@ from database.db import get_db_connection
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Helper functions for login
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 

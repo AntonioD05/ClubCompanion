@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-# Models
+
 class LoginData(BaseModel):
     email: str
     password: str
@@ -20,18 +20,18 @@ class ClubRegister(BaseModel):
     description: Optional[str] = None
     interests: List[str]
 
-# Profile update model
+
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     interests: Optional[List[str]] = None
     description: Optional[str] = None
-    profile_picture: Optional[str] = None  # Base64 encoded image string
+    profile_picture: Optional[str] = None  
 
-# Message models
+
 class MessageCreate(BaseModel):
     content: str
     recipient_id: int
-    recipient_type: str  # 'student' or 'club'
+    recipient_type: str  
 
 class MessageResponse(BaseModel):
     id: int

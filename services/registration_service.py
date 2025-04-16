@@ -14,10 +14,10 @@ async def register_student(student: StudentRegister):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Hash password
+       
         password_hash = pwd_context.hash(student.password)
         
-        # Insert auth credentials
+      
         cur.execute(
             """
             INSERT INTO auth_credentials (email, password_hash, user_type)
@@ -28,7 +28,7 @@ async def register_student(student: StudentRegister):
         )
         auth_id = cur.fetchone()["id"]
         
-        # Insert student profile
+       
         cur.execute(
             """
             INSERT INTO students (auth_id, name, interests)
@@ -63,13 +63,13 @@ async def register_club(club: ClubRegister):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # First create auth credentials
+        
         password_hash = pwd_context.hash(club.password)
         
-        # Start transaction
+     
         cur.execute("BEGIN")
         
-        # Insert auth credentials
+        
         cur.execute(
             """
             INSERT INTO auth_credentials (email, password_hash, user_type)
@@ -80,7 +80,7 @@ async def register_club(club: ClubRegister):
         )
         auth_id = cur.fetchone()["id"]
         
-        # Insert club profile
+      
         cur.execute(
             """
             INSERT INTO clubs (auth_id, name, description, interests)
@@ -92,7 +92,7 @@ async def register_club(club: ClubRegister):
         
         club_id = cur.fetchone()["id"]
         
-        # Commit transaction
+       
         cur.execute("COMMIT")
         
         return {"id": club_id, "message": "Club registered successfully"}
@@ -111,7 +111,7 @@ async def register_club(club: ClubRegister):
         if conn:
             conn.close()
 
-#Duplicate email checker
+
 def email_exists(email: str) -> bool:
     conn = None
     cur = None
@@ -124,7 +124,7 @@ def email_exists(email: str) -> bool:
         )
         return cur.fetchone() is not None
     except Exception:
-        return False  # optional: handle differently if you want
+        return False 
     finally:
         if cur:
             cur.close()

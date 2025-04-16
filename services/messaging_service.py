@@ -15,7 +15,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Validate recipient exists
+      
         if message.recipient_type == 'student':
             cur.execute("SELECT id, name, profile_picture FROM students WHERE id = %s", (message.recipient_id,))
         else:
@@ -25,7 +25,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         if not recipient:
             raise HTTPException(status_code=404, detail=f"{message.recipient_type.capitalize()} not found")
         
-        # Get sender info
+       
         if sender_type == 'student':
             cur.execute("SELECT name, profile_picture FROM students WHERE id = %s", (sender_id,))
         else:
@@ -35,7 +35,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         if not sender:
             raise HTTPException(status_code=404, detail=f"{sender_type.capitalize()} not found")
         
-        # Insert message
+        
         cur.execute(
             """
             INSERT INTO messages (content, sender_id, sender_type, recipient_id, recipient_type, created_at)
@@ -48,7 +48,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         new_message = cur.fetchone()
         conn.commit()
         
-        # Return the message with additional info
+       
         return MessageResponse(
             id=new_message["id"],
             content=message.content,
@@ -87,7 +87,7 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Create base query
+       
         query = """
         SELECT m.id, m.content, m.sender_id, m.sender_type, m.recipient_id, m.recipient_type, 
                m.created_at, m.read
@@ -98,21 +98,21 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         
         params = [user_id, user_type, user_id, user_type]
         
-        # Add unread filter if specified
+       
         if unread_only:
             query += " AND m.read = FALSE AND m.recipient_id = %s AND m.recipient_type = %s"
             params.extend([user_id, user_type])
         
-        # Add order by
+       
         query += " ORDER BY m.created_at DESC"
         
         cur.execute(query, params)
         messages_data = cur.fetchall()
         
-        # Fetch user information for senders and recipients
+       
         messages = []
         for msg in messages_data:
-            # Get sender info
+            
             if msg["sender_type"] == "student":
                 cur.execute("SELECT name, profile_picture FROM students WHERE id = %s", (msg["sender_id"],))
             else:
@@ -154,7 +154,7 @@ async def mark_message_as_read(message_id: int, user_id: int, user_type: str):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Update the message
+       
         cur.execute(
             """
             UPDATE messages
@@ -198,7 +198,7 @@ async def get_message_threads(user_id: int, user_type: str):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # First get all users this user has exchanged messages with
+       
         query = """
         WITH message_users AS (
             -- Get all other users from received messages
@@ -231,9 +231,8 @@ async def get_message_threads(user_id: int, user_type: str):
         contacts = cur.fetchall()
         
         threads = []
-        # For each contact, get the most recent message
+       
         for contact in contacts:
-            # Get most recent message with this contact
             cur.execute("""
             SELECT m.id, m.content, m.sender_id, m.sender_type, m.recipient_id, m.recipient_type, 
                    m.created_at, m.read
@@ -247,7 +246,7 @@ async def get_message_threads(user_id: int, user_type: str):
             
             latest_message = cur.fetchone()
             
-            # Get unread count
+            
             cur.execute("""
             SELECT COUNT(*) as unread_count
             FROM messages
@@ -256,7 +255,7 @@ async def get_message_threads(user_id: int, user_type: str):
             
             unread_count = cur.fetchone()["unread_count"]
             
-            # Add to threads
+         
             threads.append({
                 "contact_id": contact["other_id"],
                 "contact_type": contact["other_type"],
@@ -272,7 +271,7 @@ async def get_message_threads(user_id: int, user_type: str):
                 "unread_count": unread_count
             })
         
-        # Sort threads by latest message time
+      
         threads.sort(key=lambda x: x["latest_message"]["created_at"], reverse=True)
         
         return threads
@@ -296,7 +295,7 @@ async def get_conversation(user_id: int, user_type: str, other_id: int, other_ty
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get messages between these two users
+       
         query = """
         SELECT m.id, m.content, m.sender_id, m.sender_type, m.recipient_id, m.recipient_type, 
                m.created_at, m.read
@@ -310,7 +309,7 @@ async def get_conversation(user_id: int, user_type: str, other_id: int, other_ty
                           other_id, other_type, user_id, user_type))
         messages_data = cur.fetchall()
         
-        # Mark unread messages as read
+       
         for msg in messages_data:
             if not msg["read"] and msg["recipient_id"] == user_id and msg["recipient_type"] == user_type:
                 cur.execute(
@@ -324,7 +323,7 @@ async def get_conversation(user_id: int, user_type: str, other_id: int, other_ty
         
         conn.commit()
         
-        # Get other user's info
+        
         if other_type == "student":
             cur.execute("SELECT name, profile_picture FROM students WHERE id = %s", (other_id,))
         else:
@@ -332,7 +331,7 @@ async def get_conversation(user_id: int, user_type: str, other_id: int, other_ty
         
         other_user = cur.fetchone()
         
-        # Get current user's info
+      
         if user_type == "student":
             cur.execute("SELECT name, profile_picture FROM students WHERE id = %s", (user_id,))
         else:
@@ -340,7 +339,7 @@ async def get_conversation(user_id: int, user_type: str, other_id: int, other_ty
         
         current_user = cur.fetchone()
         
-        # Format messages
+        
         messages = []
         for msg in messages_data:
             messages.append({

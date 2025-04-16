@@ -30,11 +30,11 @@ export default function StudentLogin() {
         throw new Error(data.detail || 'Login failed');
       }
 
-      // Store the student ID in sessionStorage
+      
       sessionStorage.setItem('studentId', data.id.toString());
       sessionStorage.setItem('userEmail', email);
       
-      // Login successful
+
       router.push('/dashboard/student');
     } catch (err) {
       setError('Incorrect email or password');

@@ -261,7 +261,7 @@
   font-weight: 600;
 }
 
-/* Search section styles */
+
 .searchBar {
   margin-bottom: 1.5rem;
 }
@@ -481,7 +481,7 @@
   margin-top: 0.25rem;
 }
 
-/* Saved clubs section styles */
+
 .savedClubsList {
   display: flex;
   flex-direction: column;
@@ -557,7 +557,7 @@
   color: var(--secondary-hover);
 }
 
-/* Modal styles */
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -667,7 +667,7 @@
   }
 }
 
-/* Loading and error styles */
+
 .loadingContainer {
   display: flex;
   justify-content: center;
@@ -710,28 +710,28 @@
   background-color: #c82333;
 }
 
-/* Messages section styles */
+
 .messagesContainer {
   display: flex;
-  background-color: var(--background-light);
+  height: 70vh;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  height: 70vh;
-  max-height: 70vh;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #121212;
 }
 
 .threadsList {
-  width: 30%;
-  border-right: 1px solid var(--border);
+  width: 35%;
+  border-right: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
-  background-color: var(--background);
+  background-color: #1a1a1a;
 }
 
 .threadsHeader {
   padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #2a2a2a;
+  color: #ffffff;
 }
 
 .threadsHeader h3 {
@@ -746,32 +746,35 @@
 
 .threadItem {
   display: flex;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .threadItem:hover {
-  background-color: var(--background-light);
+  background-color: #2a2a2a;
 }
 
 .activeThread {
-  background-color: var(--background-light) !important;
-  border-left: 3px solid var(--primary);
+  background-color: #0077b6;
 }
 
 .unreadThread {
-  background-color: rgba(var(--primary-rgb), 0.05);
+  background-color: #2a2a2a;
 }
 
 .contactAvatar {
+  position: relative;
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  margin-right: 1rem;
   border-radius: 50%;
-  margin-right: 0.75rem;
-  position: relative;
-  flex-shrink: 0;
+  background-color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatarImage {
@@ -783,42 +786,36 @@
 }
 
 .avatarInitials {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--primary);
-  color: white;
-  border-radius: 50%;
+  font-size: 1rem;
   font-weight: 500;
+  color: #ffffff;
 }
 
 .unreadBadge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  background-color: var(--error);
+  top: -5px;
+  right: -5px;
+  background-color: #0077b6;
   color: white;
-  font-size: 0.7rem;
-  width: 18px;
-  height: 18px;
   border-radius: 50%;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--background);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .threadInfo {
   flex: 1;
-  min-width: 0; /* Helps with text truncation */
+  min-width: 0;
+  color: #ffffff;
 }
 
 .threadHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 0.25rem;
 }
 
@@ -830,27 +827,29 @@
 }
 
 .messageTime {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  color: #aaa;
   white-space: nowrap;
+  margin-left: 0.5rem;
 }
 
 .messagePreview {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #aaa;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .noMessages {
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  height: 100%;
+  color: #aaa;
   text-align: center;
+  padding: 1rem;
 }
 
 .emptyStateIcon {
@@ -860,7 +859,7 @@
 
 .noMessagesHint {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  max-width: 240px;
   margin-top: 0.5rem;
 }
 
@@ -868,32 +867,33 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-light);
+  background-color: #121212;
 }
 
 .noConversationSelected {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  height: 100%;
+  color: #aaa;
   text-align: center;
-  color: var(--text-muted);
+  padding: 1rem;
 }
 
 .conversationHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background-color: var(--background);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
+  background-color: #1a1a1a;
 }
 
 .contactInfo {
   display: flex;
   align-items: center;
+  color: #ffffff;
 }
 
 .contactInfo .contactAvatar {
@@ -901,25 +901,24 @@
 }
 
 .contactInfo .contactName {
-  margin: 0;
+  margin-left: 1rem;
   font-size: 1.1rem;
 }
 
 .closeConversationButton {
   background: none;
   border: none;
+  color: #aaa;
   cursor: pointer;
-  color: var(--text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.25rem;
-  border-radius: 50%;
+  transition: color 0.2s;
 }
 
 .closeConversationButton:hover {
-  background-color: var(--background-light);
-  color: var(--foreground);
+  color: #ffffff;
 }
 
 .messagesView {
@@ -928,12 +927,12 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  background-color: #121212;
 }
 
 .message {
-  max-width: 70%;
-  display: flex;
+  max-width: 75%;
 }
 
 .sentMessage {
@@ -951,32 +950,31 @@
 }
 
 .sentMessage .messageContent {
-  background-color: var(--primary);
+  background-color: #0077b6;
   color: white;
-  border-bottom-right-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
 }
 
 .receivedMessage .messageContent {
-  background-color: var(--background);
-  border-bottom-left-radius: 0.25rem;
+  background-color: #2a2a2a;
+  border-top-left-radius: 0.25rem;
+  color: #ffffff;
 }
 
-.messageTime {
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
+.sentMessage .messageTime {
   text-align: right;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
-}
-
-.sentMessage .messageTime {
-  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
 }
 
 .receivedMessage .messageTime {
-  color: var(--text-muted);
+  text-align: left;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
 }
 
 .readStatus {
@@ -986,60 +984,53 @@
 
 .messageInputContainer {
   padding: 1rem;
-  border-top: 1px solid var(--border);
-  background-color: var(--background);
+  border-top: 1px solid #2a2a2a;
   display: flex;
   gap: 0.5rem;
+  background-color: #1a1a1a;
 }
 
 .messageInput {
   flex: 1;
-  resize: none;
-  border: 1px solid var(--border);
+  border: 1px solid #2a2a2a;
   border-radius: 1.5rem;
   padding: 0.75rem 1rem;
+  resize: none;
+  max-height: 120px;
   font-family: inherit;
-  font-size: 0.95rem;
-  background-color: var(--background-light);
-  color: var(--foreground);
-  outline: none;
-  max-height: 100px;
-  min-height: 40px;
-}
-
-.messageInput::placeholder {
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  background-color: #272727;
+  color: #ffffff;
+  transition: border-color 0.2s;
 }
 
 .messageInput:focus {
-  border-color: var(--primary);
+  outline: none;
+  border-color: #0077b6;
 }
 
 .sendButton {
-  background-color: var(--primary);
-  color: white;
-  border: none;
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  background-color: #0077b6;
+  color: white;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s;
   align-self: flex-end;
 }
 
 .sendButton:disabled {
-  background-color: var(--border);
-  cursor: not-allowed;
+  background-color: #2a2a2a;
+  color: #666;
+  cursor: default;
 }
 
-.sendButton svg {
-  width: 20px;
-  height: 20px;
-}
 
-/* Make the messaging container responsive */
 @media (max-width: 768px) {
   .messagesContainer {
     flex-direction: column;
@@ -1060,7 +1051,7 @@
   }
 }
 
-/* Club Profile Modal Styles */
+
 .profileModal {
   max-width: 600px;
   max-height: 90vh;
@@ -1121,7 +1112,7 @@
   gap: 0.5rem;
 }
 
-/* Ensure largeAvatarImage and largeAvatarInitials styles are defined */
+
 .largeAvatarImage {
   width: 100%;
   height: 100%;

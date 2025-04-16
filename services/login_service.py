@@ -57,7 +57,7 @@ async def club_login(login_data: LoginData):
         if not club or not verify_password(login_data.password, club["password_hash"]):
             raise HTTPException(status_code=401, detail="Incorrect email or password")
         
-        # Get the club_id from the clubs table
+       
         cur.execute(
             "SELECT id FROM clubs WHERE auth_id = %s",
             (club["id"],)

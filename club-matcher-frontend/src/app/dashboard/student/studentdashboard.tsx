@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './studentdashboard.module.css';
 
-// Define Club interface for type safety
+
 interface Club {
   id: number;
   name: string;
@@ -14,7 +14,7 @@ interface Club {
   email: string;
 }
 
-// Mock club data
+
 const mockClubs: Club[] = [
   {
     id: 1,
@@ -63,7 +63,7 @@ const mockClubs: Club[] = [
   }
 ];
 
-// Mock user data
+
 const mockUserData = {
   name: 'John Doe',
   email: 'johndoe@ufl.edu',
@@ -71,7 +71,7 @@ const mockUserData = {
   profilePicture: null as string | null
 };
 
-// List of available interests for filtering
+
 const INTERESTS_OPTIONS = [
   'Technology',
   'Sports',
@@ -90,7 +90,7 @@ const INTERESTS_OPTIONS = [
   'Religious'
 ];
 
-// Profile Section Component
+
 const ProfileSection = () => {
   const [userData, setUserData] = useState({
     name: '',
@@ -113,13 +113,13 @@ const ProfileSection = () => {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
-  // Load user data from backend
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsDataLoading(true);
         setLoadError('');
-        // Get student ID from sessionStorage
+        
         const storedId = sessionStorage.getItem('studentId');
         const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
         const response = await fetch(`/api/profile/student/${studentId}`);
@@ -154,7 +154,7 @@ const ProfileSection = () => {
     fetchUserData();
   }, []);
 
-  // Handle interest toggle
+
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
       setSelectedInterests(selectedInterests.filter(i => i !== interest));
@@ -163,7 +163,7 @@ const ProfileSection = () => {
     }
   };
 
-  // Handle password change
+  
   const handlePasswordChange = () => {
     if (password.new !== password.confirm) {
       setPasswordError('New passwords do not match');
@@ -175,18 +175,18 @@ const ProfileSection = () => {
       return;
     }
     
-    // In a real app, you'd call an API to update the password
+   
     console.log('Password would be updated here');
     setPasswordError('');
     setShowPasswordFields(false);
     setPassword({ current: '', new: '', confirm: '' });
     
-    // Show success message
+    
     setSuccessMessage('Password updated successfully!');
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  // Handle profile picture upload
+  
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -198,14 +198,14 @@ const ProfileSection = () => {
     }
   };
 
-  // Save profile changes
+  
   const saveProfileChanges = async () => {
     setIsLoading(true);
 
     try {
-      // Get student ID from sessionStorage
+   
       const storedId = sessionStorage.getItem('studentId');
-      const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+      const studentId = storedId ? parseInt(storedId) : 1; 
       
       const profileData = {
         name: userData.name,
@@ -227,21 +227,21 @@ const ProfileSection = () => {
         throw new Error(data.detail || 'Failed to update profile');
       }
 
-      // Update local state
+     
       setUserData({
         ...userData,
         interests: selectedInterests,
         profilePicture: profileImage
       });
       
-      // Show success message
+     
       setSuccessMessage('Profile updated successfully!');
       
-      // Refresh data from server after 1 second (to allow database to update)
+      
       setTimeout(async () => {
         try {
           const storedId = sessionStorage.getItem('studentId');
-          const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
+          const studentId = storedId ? parseInt(storedId) : 1; 
           const refreshResponse = await fetch(`/api/profile/student/${studentId}`);
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
@@ -324,7 +324,7 @@ const ProfileSection = () => {
             </button>
           </div>
 
-          {/* Profile Info Section */}
+         
           <div className={styles.profileInfoSection}>
             <div className={styles.formGroup}>
               <label>Name</label>
@@ -346,7 +346,7 @@ const ProfileSection = () => {
               <div className={styles.inputHelp}>Email cannot be changed</div>
             </div>
             
-            {/* Password Section */}
+           
             <div className={styles.formGroup}>
               <div className={styles.passwordHeader}>
                 <label>Password</label>
@@ -446,10 +446,10 @@ const SearchSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch saved clubs status
+  
   const fetchSavedClubsStatus = async () => {
     try {
-      // Get student ID from sessionStorage
+      
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -457,7 +457,7 @@ const SearchSection = () => {
       
       if (response.ok) {
         const data = await response.json();
-        // Extract club IDs from saved clubs
+        
         const savedIds = data.map((club: any) => club.id);
         setSavedClubs(savedIds);
       } else {
@@ -468,7 +468,7 @@ const SearchSection = () => {
     }
   };
 
-  // Fetch clubs from API
+  
   useEffect(() => {
     const fetchClubs = async () => {
       try {
@@ -479,7 +479,7 @@ const SearchSection = () => {
         
         if (response.ok) {
           const data = await response.json();
-          // Map API data to Club interface
+          
           const mappedClubs = data.map((club: any) => ({
             id: club.id,
             name: club.name,
@@ -491,19 +491,18 @@ const SearchSection = () => {
           }));
           setClubs(mappedClubs);
           
-          // After loading clubs, fetch saved clubs status
+          
           await fetchSavedClubsStatus();
         } else {
           const errorData = await response.json();
           setError(`Failed to load clubs: ${errorData.detail || 'Unknown error'}`);
           console.error('Error loading clubs:', errorData);
-          // Fallback to mock data if API fails
+          
           setClubs(mockClubs);
         }
       } catch (error) {
         setError('Failed to connect to server. Using sample data instead.');
         console.error('Error fetching clubs:', error);
-        // Fallback to mock data on error
         setClubs(mockClubs);
       } finally {
         setIsLoading(false);
@@ -513,18 +512,18 @@ const SearchSection = () => {
     fetchClubs();
   }, []);
 
-  // Filter clubs based on search query and filters
+  
   const filteredClubs = clubs.filter(club => {
-    // Filter by search query
+  
     const matchesSearch = searchQuery === '' || 
       club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       club.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by selected interests
+    
     const matchesInterests = selectedInterests.length === 0 || 
       club.interests.some(interest => selectedInterests.includes(interest));
     
-    // Filter by member count
+   
     let matchesMembers = true;
     if (memberFilter === 'small') {
       matchesMembers = club.members < 30;
@@ -537,7 +536,7 @@ const SearchSection = () => {
     return matchesSearch && matchesInterests && matchesMembers;
   });
 
-  // Toggle interest selection
+  
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
       setSelectedInterests(selectedInterests.filter(i => i !== interest));
@@ -546,15 +545,15 @@ const SearchSection = () => {
     }
   };
 
-  // Toggle saving a club
+ 
   const toggleSaveClub = async (clubId: number) => {
     try {
-      // Get student ID from sessionStorage
+      
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
       if (savedClubs.includes(clubId)) {
-        // Unsave the club
+       
         const response = await fetch(`/api/student/${studentId}/unsave-club/${clubId}`, {
           method: 'DELETE'
         });
@@ -566,7 +565,7 @@ const SearchSection = () => {
           setSuccessMessage('Failed to remove club from saved');
         }
       } else {
-        // Save the club
+       
         const response = await fetch(`/api/student/${studentId}/save-club/${clubId}`, {
           method: 'POST'
         });
@@ -579,10 +578,10 @@ const SearchSection = () => {
         }
       }
       
-      // Clear success message after 3 seconds
+     
       setTimeout(() => setSuccessMessage(''), 3000);
       
-      // This will notify the SavedClubsSection to refresh
+      
       const event = new CustomEvent('saved-clubs-changed');
       document.dispatchEvent(event);
       
@@ -593,7 +592,7 @@ const SearchSection = () => {
     }
   };
 
-  // Generate club initials for avatar
+ 
   const getClubInitials = (name: string) => {
     return name
       .split(' ')
@@ -603,18 +602,18 @@ const SearchSection = () => {
       .slice(0, 2);
   };
 
-  // Open contact modal
+  
   const openContactModal = (clubId: number) => {
     setActiveClubId(clubId);
     setContactModalOpen(true);
   };
 
-  // Send contact message
+  
   const sendContactMessage = async () => {
     if (!contactMessage.trim() || !activeClubId) return;
     
     try {
-      // Get student ID from sessionStorage
+    
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -633,16 +632,16 @@ const SearchSection = () => {
       });
       
       if (response.ok) {
-        // Reset form and close modal
+       
         setContactMessage('');
         setContactModalOpen(false);
         setActiveClubId(null);
         
-        // Show success message
+       
         setSuccessMessage('Message sent successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
         
-        // Switch to messages tab to view the conversation
+       
         setTimeout(() => {
           const setActiveTab = (tab: string) => {
             const event = new CustomEvent('set-active-tab', { detail: tab });
@@ -846,7 +845,7 @@ const SearchSection = () => {
   );
 };
 
-// Add this ClubProfileModal component right after the SavedClubsSection component definition but before the MessagesSection
+
 const ClubProfileModal = ({ club, onClose }: { club: Club | null, onClose: () => void }) => {
   if (!club) return null;
   
@@ -917,7 +916,7 @@ const ClubProfileModal = ({ club, onClose }: { club: Club | null, onClose: () =>
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
-                // Add logic to open contact modal if needed
+                
               }}
             >
               Contact Club
@@ -929,7 +928,6 @@ const ClubProfileModal = ({ club, onClose }: { club: Club | null, onClose: () =>
   );
 };
 
-// Now update the SavedClubsSection to use the ClubProfileModal
 const SavedClubsSection = () => {
   const [savedClubs, setSavedClubs] = useState<Club[]>([]);
   const [expandedClubId, setExpandedClubId] = useState<number | null>(null);
@@ -942,13 +940,13 @@ const SavedClubsSection = () => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedClubForProfile, setSelectedClubForProfile] = useState<Club | null>(null);
 
-  // Fetch saved clubs from API
+ 
   const fetchSavedClubs = async () => {
     try {
       setIsLoading(true);
       setError('');
       
-      // Get student ID from sessionStorage
+     
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -956,7 +954,7 @@ const SavedClubsSection = () => {
       
       if (response.ok) {
         const data = await response.json();
-        // Map API data to Club interface
+        
         const mappedClubs = data.map((club: any) => ({
           id: club.id,
           name: club.name,
@@ -982,25 +980,25 @@ const SavedClubsSection = () => {
     }
   };
 
-  // Listen for saved-clubs-changed event
+  
   useEffect(() => {
     const handleSavedClubsChanged = () => {
       fetchSavedClubs();
     };
     
-    // Add event listener
+   
     document.addEventListener('saved-clubs-changed', handleSavedClubsChanged);
     
-    // Initial fetch
+  
     fetchSavedClubs();
     
-    // Clean up
+
     return () => {
       document.removeEventListener('saved-clubs-changed', handleSavedClubsChanged);
     };
   }, []);
 
-  // Generate club initials for avatar
+  
   const getClubInitials = (name: string) => {
     return name
       .split(' ')
@@ -1010,12 +1008,12 @@ const SavedClubsSection = () => {
       .slice(0, 2);
   };
 
-  // Remove club from saved
+  
   const removeFromSaved = async (clubId: number, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent expanding the club card
+    event.stopPropagation(); 
     
     try {
-      // Get student ID from sessionStorage
+  
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -1024,14 +1022,14 @@ const SavedClubsSection = () => {
       });
       
       if (response.ok) {
-        // Remove from local state
+       
         setSavedClubs(savedClubs.filter(club => club.id !== clubId));
         
-        // Show success message
+   
         setSuccessMessage('Club removed from saved');
         setTimeout(() => setSuccessMessage(''), 3000);
         
-        // Dispatch event to notify SearchSection that saved clubs changed
+       
         const event = new CustomEvent('saved-clubs-changed');
         document.dispatchEvent(event);
       } else {
@@ -1045,7 +1043,7 @@ const SavedClubsSection = () => {
     }
   };
 
-  // Toggle expanded club view
+  
   const toggleClubExpanded = (clubId: number) => {
     if (expandedClubId === clubId) {
       setExpandedClubId(null);
@@ -1054,19 +1052,19 @@ const SavedClubsSection = () => {
     }
   };
 
-  // Open contact modal
+  
   const openContactModal = (clubId: number, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent expanding the club card
+    event.stopPropagation(); 
     setActiveClubId(clubId);
     setContactModalOpen(true);
   };
 
-  // Send contact message
+
   const sendContactMessage = async () => {
     if (!contactMessage.trim() || !activeClubId) return;
     
     try {
-      // Get student ID from sessionStorage
+      
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -1085,16 +1083,15 @@ const SavedClubsSection = () => {
       });
       
       if (response.ok) {
-        // Reset form and close modal
+       
         setContactMessage('');
         setContactModalOpen(false);
         setActiveClubId(null);
         
-        // Show success message
+      
         setSuccessMessage('Message sent successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
         
-        // Switch to messages tab to view the conversation
         setTimeout(() => {
           const setActiveTab = (tab: string) => {
             const event = new CustomEvent('set-active-tab', { detail: tab });
@@ -1112,20 +1109,20 @@ const SavedClubsSection = () => {
     }
   };
 
-  // Open club profile modal
+ 
   const openProfileModal = (club: Club, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent expanding the club card
+    event.stopPropagation(); 
     setSelectedClubForProfile(club);
     setProfileModalOpen(true);
   };
 
-  // Close club profile modal
+
   const closeProfileModal = () => {
     setProfileModalOpen(false);
     setSelectedClubForProfile(null);
   };
 
-  // Get active club
+ 
   const activeClub = activeClubId ? savedClubs.find(club => club.id === activeClubId) : null;
 
   return (
@@ -1285,7 +1282,7 @@ const SavedClubsSection = () => {
   );
 };
 
-// Messages Section Component
+
 const MessagesSection = () => {
   const [threads, setThreads] = useState<any[]>([]);
   const [activeConversation, setActiveConversation] = useState<any>(null);
@@ -1294,14 +1291,14 @@ const MessagesSection = () => {
   const [loadError, setLoadError] = useState('');
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load message threads from backend
+ 
   useEffect(() => {
     const fetchMessageThreads = async () => {
       try {
         setIsLoading(true);
         setLoadError('');
         
-        // Get student ID from sessionStorage
+       
         const storedId = sessionStorage.getItem('studentId');
         const studentId = storedId ? parseInt(storedId) : 1; // Fallback to 1 if not found
         
@@ -1326,12 +1323,12 @@ const MessagesSection = () => {
     fetchMessageThreads();
   }, []);
 
-  // Load conversation when a thread is selected
+  
   const loadConversation = async (contactId: number, contactType: string) => {
     try {
       setIsLoading(true);
       
-      // Get student ID from sessionStorage
+    
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -1341,7 +1338,7 @@ const MessagesSection = () => {
         const data = await response.json();
         setActiveConversation(data);
         
-        // Update thread read status in the threads list
+       
         setThreads(threads.map(thread => {
           if (thread.contact_id === contactId && thread.contact_type === contactType) {
             return {
@@ -1356,7 +1353,7 @@ const MessagesSection = () => {
           return thread;
         }));
         
-        // Scroll to bottom of messages after they load
+       
         setTimeout(() => {
           if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
@@ -1374,12 +1371,12 @@ const MessagesSection = () => {
     }
   };
 
-  // Send new message
+ 
   const sendMessage = async () => {
     if (!newMessage.trim() || !activeConversation) return;
     
     try {
-      // Get student ID from sessionStorage
+    
       const storedId = sessionStorage.getItem('studentId');
       const studentId = storedId ? parseInt(storedId) : 1;
       
@@ -1398,13 +1395,13 @@ const MessagesSection = () => {
       });
       
       if (response.ok) {
-        // Clear input field
+        
         setNewMessage('');
         
-        // Refresh conversation to include new message
+      
         loadConversation(activeConversation.other_user.id, activeConversation.other_user.type);
         
-        // Also refresh threads to update latest message
+        
         const threadsResponse = await fetch(`/api/messages/student/${studentId}/threads`);
         if (threadsResponse.ok) {
           const threadsData = await threadsResponse.json();
@@ -1420,7 +1417,7 @@ const MessagesSection = () => {
     }
   };
 
-  // Format date for display
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -1433,7 +1430,7 @@ const MessagesSection = () => {
     }
   };
 
-  // Generate contact initials for avatar
+  
   const getContactInitials = (name: string) => {
     if (!name) return '';
     return name
@@ -1629,7 +1626,7 @@ const MessagesSection = () => {
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState(() => {
-    // Try to get the saved tab from sessionStorage on initial load
+   
     if (typeof window !== 'undefined') {
       const savedTab = sessionStorage.getItem('studentActiveTab');
       return savedTab || 'profile';
@@ -1637,30 +1634,30 @@ export default function StudentDashboard() {
     return 'profile';
   });
 
-  // Add event listener for the custom event
+  
   useEffect(() => {
     const handleSetActiveTab = (event: CustomEvent) => {
       setActiveTab(event.detail);
-      // Save the active tab to sessionStorage whenever it changes
+     
       sessionStorage.setItem('studentActiveTab', event.detail);
     };
 
-    // Save the active tab to sessionStorage whenever it changes directly
+    
     const saveTab = () => {
       sessionStorage.setItem('studentActiveTab', activeTab);
     };
     saveTab();
 
-    // Add event listener
+    
     document.addEventListener('set-active-tab', handleSetActiveTab as EventListener);
 
-    // Clean up
+    
     return () => {
       document.removeEventListener('set-active-tab', handleSetActiveTab as EventListener);
     };
   }, [activeTab]);
 
-  // Update tab handler to also save to sessionStorage
+  
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     sessionStorage.setItem('studentActiveTab', tab);

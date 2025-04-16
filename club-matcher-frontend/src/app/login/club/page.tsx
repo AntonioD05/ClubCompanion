@@ -28,14 +28,14 @@ export default function ClubLogin() {
 
       if (!response.ok) {
         setError(data.detail || 'Incorrect email or password');
-        return; // Don't redirect if login failed
+        return; 
       }
 
-      // Store the club ID and email in sessionStorage
+      
       sessionStorage.setItem('clubId', data.id.toString());
       sessionStorage.setItem('userEmail', email);
       
-      // Only redirect if login was successful
+    
       router.push('/dashboard/club');
     } catch (err) {
       setError('Login failed. Please try again.');

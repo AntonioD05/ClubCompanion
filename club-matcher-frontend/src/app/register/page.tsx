@@ -3,7 +3,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 
-// List of available interests
+
 const INTERESTS_OPTIONS = [
   'Technology',
   'Sports',
@@ -43,7 +43,7 @@ export default function Register() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [error, setError] = useState('');
 
-  // Toggle interest selection
+ 
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
       setSelectedInterests(selectedInterests.filter(i => i !== interest));
@@ -56,7 +56,7 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    // Add UF email validation for students
+    
     if (!isClub && !formData.email.endsWith('@ufl.edu')) {
       setError('Please use a valid UF email address (@ufl.edu)');
       return;
@@ -67,7 +67,7 @@ export default function Register() {
       return;
     }
 
-    // Validate that at least one interest is selected
+    
     if (selectedInterests.length === 0) {
       setError('Please select at least one interest');
       return;
@@ -99,7 +99,7 @@ export default function Register() {
         throw new Error(data.detail || 'Registration failed');
       }
 
-      // Registration successful
+      
       router.push(`/login/${isClub ? 'club' : 'student'}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
