@@ -26,15 +26,15 @@ To initialize the database schema:
 docker exec -it club-matcher-db psql -U admin -d clubmatcher
 
 # From another terminal, run the schema file
-cat schema.sql | docker exec -i club-matcher-db psql -U admin -d clubmatcher
+cat database/combined_schema.sql | docker exec -i club-matcher-db psql -U admin -d clubmatcher
 ```
 
 #### Without Docker
 1. Install PostgreSQL manually 
 2. Create a database called `clubmatcher`
-3. Run the schema file:
+3. Run the combined schema file:
 ```bash
-psql -U your_username -d clubmatcher -f schema.sql
+psql -U your_username -d clubmatcher -f database/combined_schema.sql
 ```
 
 ### 2. Backend Setup
@@ -142,7 +142,13 @@ This configuration allows the frontend to make API calls without CORS issues and
 
 - Backend API documentation is available at: http://127.0.0.1:8000/docs
 - The frontend uses React components with TypeScript
-- Database schema is defined in `schema.sql`
+- Database schema is defined in `database/combined_schema.sql`
+
+## Database Schema
+
+We've combined all SQL schema files into a single `database/combined_schema.sql` file for easier setup and maintenance. This file contains all tables, constraints, and indexes required for the application to function properly.
+
+For more details on the database setup, refer to the `database/README.md` file.
 
 ## Troubleshooting
 
