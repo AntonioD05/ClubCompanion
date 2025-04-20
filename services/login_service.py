@@ -18,8 +18,7 @@ async def student_login(login_data: LoginData):
         
         if not user or not verify_password(login_data.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Incorrect email or password")
-        
-        # Get the student_id from the students table
+
         cur.execute(
             "SELECT id FROM students WHERE auth_id = %s",
             (user["id"],)

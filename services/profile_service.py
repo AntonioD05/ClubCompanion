@@ -48,9 +48,6 @@ async def save_profile_image(base64_image: str, user_id: int, user_type: str) ->
         return None
 
 async def get_student_profile(student_id: int):
-    """
-    Get a student's profile information
-    """
     conn = None
     cur = None
     
@@ -98,9 +95,6 @@ async def get_student_profile(student_id: int):
             conn.close()
 
 async def get_club_profile(club_id: int):
-    """
-    Get a club's profile information
-    """
     conn = None
     cur = None
     
@@ -148,9 +142,6 @@ async def get_club_profile(club_id: int):
             conn.close()
 
 async def update_student_profile(student_id: int, profile_data: ProfileUpdate):
-    """
-    Update a student's profile information
-    """
     conn = None
     cur = None
     
@@ -221,9 +212,6 @@ async def update_student_profile(student_id: int, profile_data: ProfileUpdate):
             conn.close()
 
 async def update_club_profile(club_id: int, profile_data: ProfileUpdate):
-    """
-    Update a club's profile information
-    """
     conn = None
     cur = None
     

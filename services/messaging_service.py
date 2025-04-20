@@ -5,9 +5,6 @@ import datetime
 from typing import List
 
 async def send_message(message: MessageCreate, sender_id: int, sender_type: str):
-    """
-    Send a message from a sender to a recipient
-    """
     conn = None
     cur = None
     
@@ -77,9 +74,6 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
             conn.close()
 
 async def get_messages(user_id: int, user_type: str, unread_only: bool = False) -> List[MessageResponse]:
-    """
-    Get messages for a user (both sent and received)
-    """
     conn = None
     cur = None
     
@@ -144,9 +138,6 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
             conn.close()
 
 async def mark_message_as_read(message_id: int, user_id: int, user_type: str):
-    """
-    Mark a message as read if the user is the recipient
-    """
     conn = None
     cur = None
     
@@ -188,9 +179,6 @@ async def mark_message_as_read(message_id: int, user_id: int, user_type: str):
             conn.close()
 
 async def get_message_threads(user_id: int, user_type: str):
-    """
-    Get all message threads for a user, with the most recent message from each thread
-    """
     conn = None
     cur = None
     
@@ -285,9 +273,6 @@ async def get_message_threads(user_id: int, user_type: str):
             conn.close()
 
 async def get_conversation(user_id: int, user_type: str, other_id: int, other_type: str):
-    """
-    Get the conversation between two users
-    """
     conn = None
     cur = None
     

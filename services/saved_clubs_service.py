@@ -4,9 +4,6 @@ from typing import List, Dict, Any
 import os
 
 async def save_club(student_id: int, club_id: int):
-    """
-    Save a club to a student's saved clubs list
-    """
     conn = None
     cur = None
     
@@ -65,9 +62,6 @@ async def save_club(student_id: int, club_id: int):
             conn.close()
 
 async def unsave_club(student_id: int, club_id: int):
-    """
-    Remove a club from a student's saved clubs list
-    """
     conn = None
     cur = None
     
@@ -104,9 +98,6 @@ async def unsave_club(student_id: int, club_id: int):
             conn.close()
 
 async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
-    """
-    Get all clubs saved by a student
-    """
     conn = None
     cur = None
     
@@ -181,9 +172,6 @@ async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
             conn.close()
 
 async def is_club_saved(student_id: int, club_id: int) -> bool:
-    """
-    Check if a club is saved by a student
-    """
     conn = None
     cur = None
     

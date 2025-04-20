@@ -7,22 +7,8 @@ from routes.profile_routes import router as profile_router
 from routes.messaging_routes import router as messaging_router
 from routes.club_routes import router as club_router
 from routes.saved_clubs_routes import router as saved_clubs_router
-'''
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr
-from passlib.context import CryptContext
-from typing import List, Optional
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import os
-from dotenv import load_dotenv
-'''
-
-# Load environment variables
-# load_dotenv()
 
 app = FastAPI()
-# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 os.makedirs("uploads/student_profile_pictures", exist_ok=True)
