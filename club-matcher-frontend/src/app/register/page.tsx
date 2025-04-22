@@ -3,7 +3,10 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import { useRouter } from 'next/navigation';
 
-
+/**
+ * Available interest options for both students and clubs
+ * These are used to populate the interest selection interface
+ */
 const INTERESTS_OPTIONS = [
   'Technology',
   'Sports',
@@ -22,6 +25,10 @@ const INTERESTS_OPTIONS = [
   'Religious'
 ];
 
+/**
+ * Interface defining the structure of registration data
+ * This is used for type checking when submitting the registration form
+ */
 interface RegisterData {
   email: string;
   password: string;
@@ -30,6 +37,14 @@ interface RegisterData {
   interests: string[];
 }
 
+/**
+ * Register Component
+ * 
+ * This component handles user registration for both students and clubs.
+ * It includes form validation, interest selection, and API integration.
+ * 
+ * @returns {JSX.Element} The registration form with all necessary fields
+ */
 export default function Register() {
   const router = useRouter();
   const [isClub, setIsClub] = useState(false);
@@ -43,7 +58,10 @@ export default function Register() {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [error, setError] = useState('');
 
- 
+  /**
+   * Toggles the selection of an interest
+   * @param {string} interest - The interest to toggle
+   */
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
       setSelectedInterests(selectedInterests.filter(i => i !== interest));
@@ -52,27 +70,34 @@ export default function Register() {
     }
   };
 
+  /**
+   * Handles form submission
+   * Validates input and sends registration data to the API
+   * @param {React.FormEvent} e - The form submission event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    
+    // Validate UF email for students
     if (!isClub && !formData.email.endsWith('@ufl.edu')) {
       setError('Please use a valid UF email address (@ufl.edu)');
       return;
     }
 
+    // Validate password match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    
+    // Validate interests selection
     if (selectedInterests.length === 0) {
       setError('Please select at least one interest');
       return;
     }
 
+    // Prepare registration data
     const registerData: RegisterData = {
       email: formData.email,
       password: formData.password,
@@ -80,11 +105,13 @@ export default function Register() {
       interests: selectedInterests
     };
 
+    // Add description for club registration
     if (isClub && formData.description) {
       registerData.description = formData.description;
     }
 
     try {
+      // Send registration request to API
       const response = await fetch(`/api/register/${isClub ? 'club' : 'student'}`, {
         method: 'POST',
         headers: {
@@ -99,7 +126,7 @@ export default function Register() {
         throw new Error(data.detail || 'Registration failed');
       }
 
-      
+      // Redirect to appropriate login page on success
       router.push(`/login/${isClub ? 'club' : 'student'}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -121,6 +148,7 @@ export default function Register() {
         <div className={styles.registerContainer}>
           <h1>Create Account</h1>
           
+          {/* Account type toggle (Student/Club) */}
           <div className={styles.toggleContainer}>
             <span className={!isClub ? styles.activeType : styles.accountType}>Student</span>
             <button 
@@ -135,6 +163,7 @@ export default function Register() {
 
           {error && <div className={styles.error}>{error}</div>}
 
+          {/* Main registration form */}
           <form onSubmit={handleSubmit} className={styles.form} suppressHydrationWarning>
             <div className={styles.formGroup}>
               <label htmlFor="email">Email {!isClub && "(UF email required)"}</label>
@@ -147,6 +176,7 @@ export default function Register() {
               />
             </div>
 
+            {/* Name input field */}
             <div className={styles.formGroup}>
               <label htmlFor="name">{isClub ? 'Club Name' : 'Full Name'}</label>
               <input
@@ -158,6 +188,7 @@ export default function Register() {
               />
             </div>
 
+            {/* Club description field (only shown for club registration) */}
             {isClub && (
               <div className={styles.formGroup}>
                 <label htmlFor="description">Club Description</label>
@@ -170,6 +201,7 @@ export default function Register() {
               </div>
             )}
 
+            {/* Interests selection section */}
             <div className={styles.formGroup}>
               <label>{isClub ? 'Club Keywords' : 'Interests'}</label>
               <p className={styles.interestsHint}>Select all that apply</p>
@@ -186,6 +218,7 @@ export default function Register() {
               </div>
             </div>
 
+            {/* Password input fields */}
             <div className={styles.formGroup}>
               <label htmlFor="password">Password</label>
               <input
@@ -208,6 +241,7 @@ export default function Register() {
               />
             </div>
 
+            {/* Submit button */}
             <button type="submit" className={styles.submitButton} suppressHydrationWarning>
               Create Account
             </button>

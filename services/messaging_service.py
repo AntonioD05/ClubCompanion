@@ -4,6 +4,7 @@ from models.schemas import MessageCreate, MessageResponse
 import datetime
 from typing import List
 
+# Send a new message between users
 async def send_message(message: MessageCreate, sender_id: int, sender_type: str):
     conn = None
     cur = None
@@ -12,7 +13,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         conn = get_db_connection()
         cur = conn.cursor()
         
-      
+        # Verify recipient exists
         if message.recipient_type == 'student':
             cur.execute("SELECT id, name, profile_picture FROM students WHERE id = %s", (message.recipient_id,))
         else:
@@ -22,7 +23,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         if not recipient:
             raise HTTPException(status_code=404, detail=f"{message.recipient_type.capitalize()} not found")
         
-       
+        # Get sender information
         if sender_type == 'student':
             cur.execute("SELECT name, profile_picture FROM students WHERE id = %s", (sender_id,))
         else:
@@ -32,7 +33,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         if not sender:
             raise HTTPException(status_code=404, detail=f"{sender_type.capitalize()} not found")
         
-        
+        # Insert new message into database
         cur.execute(
             """
             INSERT INTO messages (content, sender_id, sender_type, recipient_id, recipient_type, created_at)
@@ -45,7 +46,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         new_message = cur.fetchone()
         conn.commit()
         
-       
+        # Return formatted message response
         return MessageResponse(
             id=new_message["id"],
             content=message.content,
@@ -73,6 +74,7 @@ async def send_message(message: MessageCreate, sender_id: int, sender_type: str)
         if conn:
             conn.close()
 
+# Retrieve messages for a user, optionally filtered by read status
 async def get_messages(user_id: int, user_type: str, unread_only: bool = False) -> List[MessageResponse]:
     conn = None
     cur = None
@@ -81,7 +83,7 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         conn = get_db_connection()
         cur = conn.cursor()
         
-       
+        # Base query to get all messages for the user
         query = """
         SELECT m.id, m.content, m.sender_id, m.sender_type, m.recipient_id, m.recipient_type, 
                m.created_at, m.read
@@ -92,7 +94,7 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         
         params = [user_id, user_type, user_id, user_type]
         
-       
+        # Add unread filter if requested
         if unread_only:
             query += " AND m.read = FALSE AND m.recipient_id = %s AND m.recipient_type = %s"
             params.extend([user_id, user_type])
@@ -103,7 +105,7 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         cur.execute(query, params)
         messages_data = cur.fetchall()
         
-       
+        # Format messages with sender information
         messages = []
         for msg in messages_data:
             
@@ -137,6 +139,7 @@ async def get_messages(user_id: int, user_type: str, unread_only: bool = False) 
         if conn:
             conn.close()
 
+# Mark a message as read for a specific user
 async def mark_message_as_read(message_id: int, user_id: int, user_type: str):
     conn = None
     cur = None
@@ -178,6 +181,7 @@ async def mark_message_as_read(message_id: int, user_id: int, user_type: str):
         if conn:
             conn.close()
 
+# Get all message threads for a user
 async def get_message_threads(user_id: int, user_type: str):
     conn = None
     cur = None
@@ -186,7 +190,7 @@ async def get_message_threads(user_id: int, user_type: str):
         conn = get_db_connection()
         cur = conn.cursor()
         
-       
+        # Query to get all unique contacts from messages
         query = """
         WITH message_users AS (
             -- Get all other users from received messages
@@ -219,7 +223,7 @@ async def get_message_threads(user_id: int, user_type: str):
         contacts = cur.fetchall()
         
         threads = []
-       
+        # Get latest message and unread count for each contact
         for contact in contacts:
             cur.execute("""
             SELECT m.id, m.content, m.sender_id, m.sender_type, m.recipient_id, m.recipient_type, 
@@ -234,7 +238,7 @@ async def get_message_threads(user_id: int, user_type: str):
             
             latest_message = cur.fetchone()
             
-            
+            # Get unread message count
             cur.execute("""
             SELECT COUNT(*) as unread_count
             FROM messages
@@ -243,7 +247,7 @@ async def get_message_threads(user_id: int, user_type: str):
             
             unread_count = cur.fetchone()["unread_count"]
             
-         
+            # Format thread information
             threads.append({
                 "contact_id": contact["other_id"],
                 "contact_type": contact["other_type"],

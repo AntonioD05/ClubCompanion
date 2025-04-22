@@ -11,19 +11,19 @@ async def save_club(student_id: int, club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-      
+        # Verify student exists
         cur.execute("SELECT id FROM students WHERE id = %s", (student_id,))
         student = cur.fetchone()
         if not student:
             raise HTTPException(status_code=404, detail="Student not found")
         
-      
+        # Verify club exists
         cur.execute("SELECT id FROM clubs WHERE id = %s", (club_id,))
         club = cur.fetchone()
         if not club:
             raise HTTPException(status_code=404, detail="Club not found")
         
-        
+        # Check if club is already saved
         cur.execute(
             "SELECT id FROM saved_clubs WHERE student_id = %s AND club_id = %s",
             (student_id, club_id)
@@ -32,7 +32,7 @@ async def save_club(student_id: int, club_id: int):
         if existing:
             return {"message": "Club already saved", "saved": True}
         
-        
+        # Save the club
         cur.execute(
             """
             INSERT INTO saved_clubs (student_id, club_id)
@@ -69,7 +69,7 @@ async def unsave_club(student_id: int, club_id: int):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        
+        # Remove the saved club record
         cur.execute(
             """
             DELETE FROM saved_clubs
@@ -105,13 +105,13 @@ async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
         conn = get_db_connection()
         cur = conn.cursor()
         
-       
+        # Verify student exists
         cur.execute("SELECT id FROM students WHERE id = %s", (student_id,))
         student = cur.fetchone()
         if not student:
             raise HTTPException(status_code=404, detail="Student not found")
         
-       
+        # Get all saved clubs with additional information
         cur.execute(
             """
             SELECT c.id, c.name, c.description, c.interests, c.profile_picture,
@@ -128,7 +128,7 @@ async def get_saved_clubs(student_id: int) -> List[Dict[str, Any]]:
         
         clubs = cur.fetchall()
         
-       
+        # Format club data with proper profile picture URLs
         formatted_clubs = []
         for club in clubs:
            
@@ -179,7 +179,7 @@ async def is_club_saved(student_id: int, club_id: int) -> bool:
         conn = get_db_connection()
         cur = conn.cursor()
         
-       
+        # Check if the club is saved by the student
         cur.execute(
             "SELECT id FROM saved_clubs WHERE student_id = %s AND club_id = %s",
             (student_id, club_id)

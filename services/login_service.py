@@ -3,6 +3,7 @@ from services.auth_service import verify_password
 from models.schemas import LoginData
 from database.db import get_db_connection
 
+# Authenticate student login credentials and return student ID
 async def student_login(login_data: LoginData):
     conn = None
     cur = None
@@ -10,6 +11,7 @@ async def student_login(login_data: LoginData):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Verify email and password against auth_credentials table
         cur.execute(
             "SELECT id, password_hash FROM auth_credentials WHERE email = %s AND user_type = 'student'",
             (login_data.email,)
@@ -19,6 +21,7 @@ async def student_login(login_data: LoginData):
         if not user or not verify_password(login_data.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Incorrect email or password")
 
+        # Get student record associated with auth credentials
         cur.execute(
             "SELECT id FROM students WHERE auth_id = %s",
             (user["id"],)
@@ -40,6 +43,7 @@ async def student_login(login_data: LoginData):
         if conn:
             conn.close()
 
+# Authenticate club login credentials and return club ID
 async def club_login(login_data: LoginData):
     conn = None
     cur = None
@@ -47,6 +51,7 @@ async def club_login(login_data: LoginData):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Verify email and password against auth_credentials table
         cur.execute(
             "SELECT id, password_hash FROM auth_credentials WHERE email = %s AND user_type = 'club'",
             (login_data.email,)
@@ -56,7 +61,7 @@ async def club_login(login_data: LoginData):
         if not club or not verify_password(login_data.password, club["password_hash"]):
             raise HTTPException(status_code=401, detail="Incorrect email or password")
         
-       
+        # Get club record associated with auth credentials
         cur.execute(
             "SELECT id FROM clubs WHERE auth_id = %s",
             (club["id"],)

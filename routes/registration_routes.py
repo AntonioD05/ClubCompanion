@@ -5,6 +5,7 @@ from services.registration_service import register_student, register_club
 
 router = APIRouter()
 
+# Handle student registration requests and create new student account
 @router.post("/register/student")
 async def register_student_route(student: StudentRegister):
     try:
@@ -15,6 +16,7 @@ async def register_student_route(student: StudentRegister):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+# Handle club registration requests and create new club account
 @router.post("/register/club")
 async def register_club_route(club: ClubRegister):
     try:

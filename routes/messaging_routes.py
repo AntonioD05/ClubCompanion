@@ -11,6 +11,7 @@ from typing import List, Optional
 
 router = APIRouter()
 
+# Student messaging endpoints
 @router.post("/messages/student/{student_id}/send")
 async def send_message_from_student(
     student_id: int,
@@ -23,6 +24,7 @@ async def send_message_from_student(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get messages for a student, optionally filtered by read status
 @router.get("/messages/student/{student_id}")
 async def get_student_messages(
     student_id: int,
@@ -35,6 +37,7 @@ async def get_student_messages(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Mark a specific message as read for a student
 @router.post("/messages/student/{student_id}/read/{message_id}")
 async def mark_student_message_as_read(
     student_id: int,
@@ -47,6 +50,7 @@ async def mark_student_message_as_read(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get all message threads for a student
 @router.get("/messages/student/{student_id}/threads")
 async def get_student_message_threads(
     student_id: int
@@ -58,6 +62,7 @@ async def get_student_message_threads(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get conversation history between a student and another user
 @router.get("/messages/student/{student_id}/conversation/{other_type}/{other_id}")
 async def get_student_conversation(
     student_id: int,
@@ -73,7 +78,7 @@ async def get_student_conversation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# Club messaging endpoints
 @router.post("/messages/club/{club_id}/send")
 async def send_message_from_club(
     club_id: int,
@@ -86,6 +91,7 @@ async def send_message_from_club(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get messages for a club, optionally filtered by read status
 @router.get("/messages/club/{club_id}")
 async def get_club_messages(
     club_id: int,
@@ -98,6 +104,7 @@ async def get_club_messages(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Mark a specific message as read for a club
 @router.post("/messages/club/{club_id}/read/{message_id}")
 async def mark_club_message_as_read(
     club_id: int,
@@ -110,6 +117,7 @@ async def mark_club_message_as_read(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get all message threads for a club
 @router.get("/messages/club/{club_id}/threads")
 async def get_club_message_threads(
     club_id: int
@@ -121,6 +129,7 @@ async def get_club_message_threads(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get conversation history between a club and another user
 @router.get("/messages/club/{club_id}/conversation/{other_type}/{other_id}")
 async def get_club_conversation(
     club_id: int,

@@ -8,6 +8,7 @@ from services.profile_service import update_student_profile, update_club_profile
 
 router = APIRouter()
 
+# Retrieve student profile information by ID
 @router.get("/profile/student/{student_id}")
 async def get_student_profile_route(student_id: int):
     try:
@@ -18,6 +19,7 @@ async def get_student_profile_route(student_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Retrieve club profile information by ID
 @router.get("/profile/club/{club_id}")
 async def get_club_profile_route(club_id: int):
     try:
@@ -28,6 +30,7 @@ async def get_club_profile_route(club_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Update student profile information
 @router.post("/profile/student/{student_id}")
 async def update_student_profile_route(student_id: int, profile_data: ProfileUpdate):
     try:
@@ -38,6 +41,7 @@ async def update_student_profile_route(student_id: int, profile_data: ProfileUpd
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Update club profile information
 @router.post("/profile/club/{club_id}")
 async def update_club_profile_route(club_id: int, profile_data: ProfileUpdate):
     try:

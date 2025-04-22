@@ -10,13 +10,14 @@ from routes.saved_clubs_routes import router as saved_clubs_router
 
 app = FastAPI()
 
-
+# Create directories for storing uploaded profile pictures
 os.makedirs("uploads/student_profile_pictures", exist_ok=True)
 os.makedirs("uploads/club_profile_pictures", exist_ok=True)
 
-
+# Mount the uploads directory to serve static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# Include all route modules with API prefix
 app.include_router(login_router, prefix="/api")
 app.include_router(registration_router, prefix="/api")
 app.include_router(profile_router, prefix="/api")
@@ -24,6 +25,7 @@ app.include_router(messaging_router, prefix="/api")
 app.include_router(club_router, prefix="/api")
 app.include_router(saved_clubs_router, prefix="/api")
 
+# Root endpoint that returns a welcome message
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Club Companion API"}

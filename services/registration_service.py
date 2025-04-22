@@ -4,6 +4,7 @@ from services.auth_service import pwd_context
 from models.schemas import StudentRegister, ClubRegister
 import psycopg2
 
+# Register a new student with their credentials and profile information
 async def register_student(student: StudentRegister):
     if email_exists(student.email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -17,7 +18,7 @@ async def register_student(student: StudentRegister):
        
         password_hash = pwd_context.hash(student.password)
         
-      
+        # Create auth credentials record for the student
         cur.execute(
             """
             INSERT INTO auth_credentials (email, password_hash, user_type)
@@ -28,7 +29,7 @@ async def register_student(student: StudentRegister):
         )
         auth_id = cur.fetchone()["id"]
         
-       
+        # Create student profile record
         cur.execute(
             """
             INSERT INTO students (auth_id, name, interests)
@@ -54,6 +55,7 @@ async def register_student(student: StudentRegister):
         if conn:
             conn.close()
 
+# Register a new club with their credentials and profile information
 async def register_club(club: ClubRegister):
     if email_exists(club.email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -69,7 +71,7 @@ async def register_club(club: ClubRegister):
      
         cur.execute("BEGIN")
         
-        
+        # Create auth credentials record for the club
         cur.execute(
             """
             INSERT INTO auth_credentials (email, password_hash, user_type)
@@ -80,7 +82,7 @@ async def register_club(club: ClubRegister):
         )
         auth_id = cur.fetchone()["id"]
         
-      
+        # Create club profile record
         cur.execute(
             """
             INSERT INTO clubs (auth_id, name, description, interests)
@@ -111,7 +113,7 @@ async def register_club(club: ClubRegister):
         if conn:
             conn.close()
 
-
+# Check if an email is already registered in the system
 def email_exists(email: str) -> bool:
     conn = None
     cur = None
