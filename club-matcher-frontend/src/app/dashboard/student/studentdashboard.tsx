@@ -1666,7 +1666,7 @@ export default function StudentDashboard() {
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
-        <h1>Student Dashboard</h1>
+        <h1 style={{position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>Student Dashboard</h1>
         <a href="/" className={styles.logoutButton}>
           Logout
         </a>
